@@ -248,9 +248,10 @@ export def update [] {
 	config get packages
 	| where freeze == false
 	| par-each {|package|
-		if ($'($package.dir)/.git' | path exists) {
+		if ($'($package.dir)/.git' | path exists) and (($package.dir | path type) == 'dir') {
 			print $' - ($package.name)'
-			PWD=$package.dir git pull -q --rebase --ff-only --no-verify --autostash
+			cd $package.dir
+			^git pull -q --ff-only
 		}
 	}
 	compile  # TODO: deactivate via config
