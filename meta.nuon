@@ -4,8 +4,7 @@
 	copyright: '2022 Jan9103 (@jan9103:matrix.org)'
 	license: 'MIT'
 	url: 'https://github.com/Jan9103/packer.nu'
-	min_nu_version: [0 70 0]
-	max_nu_version: [0 68 1]
-	modules: []
+	min_nu_version: [0 68 1]
+	max_nu_version: [0 70 0]
 }
 # vim: ft=nu

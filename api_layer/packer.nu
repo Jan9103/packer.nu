@@ -1,28 +1,34 @@
 def 'config load' [] {open $'($nu.env-path | path dirname)/packages.nuon'}
 
-def 'config get packages' [] {
+# API-INTERFACE: Parse a package dnfinition from packages.nuon
+export def 'config parse package' [
+	package: record  # the package entry
+] {
+	let name = (
+		$package | get -i as
+		| default ($package.source | path basename)
+	)
+	{
+		source: $package.source
+		deactivate: ($package | get -i deactivate | default false)
+		freeze: ($package | get -i freeze | default false)
+		opt: ($package | get -i opt | default false)
+		name: $name
+		dir: (
+			if ($package | get -i opt | default false) {
+				$'($env.NU_PACKER_HOME)/opt/($name)'
+			} else {$'($env.NU_PACKER_HOME)/start/($name)'}
+		)
+		config: ($package | get -i config)
+		condition: ($package | get -i condition)
+	}
+}
+
+# API-INTERFACE: Get packages defined in packages.nuon
+export def 'config get packages' [] {
 	config load
 	| get -i packages | default []
-	| par-each {|package|
-		let name = (
-			$package | get -i as
-			| default ($package.source | path basename)
-		)
-		{
-			source: $package.source
-			deactivate: ($package | get -i deactivate | default false)
-			freeze: ($package | get -i freeze | default false)
-			opt: ($package | get -i opt | default false)
-			name: $name
-			dir: (
-				if ($package | get -i opt | default false) {
-					$'($env.NU_PACKER_HOME)/opt/($name)'
-				} else {$'($env.NU_PACKER_HOME)/start/($name)'}
-			)
-			config: ($package | get -i config)
-			condition: ($package | get -i condition)
-		}
-	}
+	| par-each {|package| config parse package $package}
 }
 
 def 'meta load' [
