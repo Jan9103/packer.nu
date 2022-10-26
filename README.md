@@ -34,10 +34,9 @@ Supported nu-versions:
 		- [x] rg
 	- [x] `$env.config` access management to prevent breaking other packages
 		- [x] for hooks
-	- [ ] unified program arguments
-		- [ ] `downloader` (curl, wget, aria2c, axel, etc)
-		- [ ] `editor` (vim, emacs, nano, etc)
-		- [ ] `pager` (less, sp, etc)
+	- [x] unified program arguments
+		- [x] `downloader` (curl, wget, aria2c, axel, etc)
+		- [x] `editor` (vim, emacs, nano, etc)
 - [x] debug-information command to help with remote-debugging of packages
 - [x] allow packages to add files to the `$env.NU_LIB_DIRS`
 - [ ] allow packages to add files to the `$env.PATH`

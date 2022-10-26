@@ -4,7 +4,33 @@
 
 export-env {
 	let-env NU_PACKER_HOME = $'($env.HOME)/.local/share/nushell/packer'
+	let-env NU_PACKER_UNIFIED = {
+		downloader: {|url,dir,file,headers,timeout|
+			let headers = (
+				$headers  # {a: b}
+				| transpose k v  # [{k: a, v: b}]
+				| each {|i| [$i.k $i.v]}  # [[a b]]
+				| flatten  # [a b]
+			)
+			fetch -b -o $'($dir)/($file)' -H $headers -t $timeout $url
+		}
+		editor: {|file,line|
+			let editor = ($env | get -i EDITOR)
+			let editor = (
+				if $editor in ['vi', 'vim', 'nvim', 'emacs', 'ne'] { $editor
+				} else { 'nano' }
+			)
+			nu -c ([
+				$editor
+				(if $line != null {$"+($line)"})
+				($file | into string | to json)  # escape spaces, etc
+			] | compact | str join ' ')
+		}
+	}
 	let-env config = (
+		# Broken ?
+		# `let-env TEST = 'FOO'` dosnt work afterwards
+		# this runs fine in interactive
 		$env.config
 		| upsert hooks {|config|
 			# TODO: keep existing hooks
@@ -17,6 +43,8 @@ export-env {
 	)
 }
 
+
 export use nuconfig.nu
 export use packer.nu
 export use parsed.nu
+export use unified.nu
