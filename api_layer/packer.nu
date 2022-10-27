@@ -54,6 +54,11 @@ def nu_version [] {
 	| each {|i| $i | into int}
 }
 
+def packer_version [] {
+	open $'($env.NU_PACKER_HOME)/start/packer.nu/meta.nuon'
+	| get -i version | default [0 0 0]
+}
+
 def version_comparison [
 	version_a #: list<int> # [mayor minor patch]
 	version_b #: list<int> # [mayor minor patch]
@@ -63,7 +68,7 @@ def version_comparison [
 	} else {
 		if $version_a.1 > $version_b.1 {'>'
 		} else if $version_a.1 < $version_b.1 {'<'
-		} else { '=='}  # <- dont ask me why nu requires a space there..
+		} else { '==' }
 	}
 }
 
@@ -71,11 +76,33 @@ def nu_escape_string [text: string] {
 	$text | str replace '[^a-zA-Z0-9]' '_'
 }
 
+# check if a package is compatible with the current install
+def is_package_compatible [
+	package
+	nu_version
+	packer_version
+] {
+	let min_nu_version = ($package.meta | get -i min_nu_version | default [0 0 0])
+	let max_nu_version = ($package.meta | get -i max_nu_version | default [9999 0 0])
+	let min_packer_version = ($package.meta | get -i min_packer_version | default [0 0 0])
+	let max_packer_version = ($package.meta | get -i max_packer_version | default [9999 0 0])
+
+	[
+		($package.dir | path exists)  # filter not installed ones
+		# filter by min and max version
+		((version_comparison $nu_version $min_nu_version) != '<')
+		((version_comparison $nu_version $max_nu_version) != '>')
+		((version_comparison $packer_version $min_packer_version) != '<')
+		((version_comparison $packer_version $max_packer_version) != '>')
+	] | all $it
+}
+
 # (re-)generate the init-system
 # is automatically executed after install and update
 export def compile [] {
-	print 'Compiling init-system'
-	let nu_version = nu_version
+	print 'Compiling init-system'  #' # <- fix TS syntax hightlight
+	let nu_version = (nu_version)
+	let packer_version = (packer_version)
 	let packages = (
 		config get packages
 		| where not opt
@@ -86,15 +113,7 @@ export def compile [] {
 			| insert meta {meta load $package}
 		}
 		| find -p {|package|
-			let min_nu_version = ($package.meta | get -i min_nu_version | default [0 0 0])
-			let max_nu_version = ($package.meta | get -i max_nu_version | default [9999 0 0])
-
-			[
-				($package.dir | path exists)  # filter not installed ones
-				# filter by min and max version
-				((version_comparison $nu_version $min_nu_version) != '<')
-				((version_comparison $nu_version $max_nu_version) != '>')
-			] | all $it
+			is_package_compatible $package $nu_version $packer_version
 		}
 	)
 	generate_init_file $packages $'($env.NU_PACKER_HOME)/packer_packages.nu'
@@ -104,32 +123,24 @@ export def compile [] {
 # used to generate the init-system conditional packages
 export def compile_cond_init [file: path] {
 	let nu_version = nu_version
+	let packer_version = (packer_version)
 	let packages = (
 		config get packages
 		| where not opt
 		| where not deactivate
 		| where condition != null
 		| par-each {|package| $package | insert meta {meta load $package}}
-		| find -p {|package|
-			let min_nu_version = ($package.meta | get -i min_nu_version | default [0 0 0])
-			let max_nu_version = ($package.meta | get -i max_nu_version | default [9999 0 0])
-			[
-				($package.dir | path exists)
-				((version_comparison $nu_version $min_nu_version) != '<')
-				((version_comparison $nu_version $max_nu_version) != '>')
-				(
-					$package.condition
-					| get -i env | default {}
-					| transpose k v
-					| each {|i| ($env | get -i $i.k) in $i.v}
-					| all $it
-				)
-			] | all $it
-		}
+		| find -p {|package| (
+			(is_package_compatible $package $nu_version $packer_version
+			) and (
+				$package.condition
+				| get -i env | default {}
+				| transpose k v
+				| each {|i| ($env | get -i $i.k) in $i.v}
+				| all $it
+			)
+		)}
 	)
-	#print $'conditional packages: ($packages | get -i name | str join " ")'
-	#if ($packages | length) == 0 { '' | save -r $file
-	#} else {generate_init_file $packages $file}
 	generate_init_file $packages $file
 }
 
