@@ -8,7 +8,7 @@ This is a early stage of this project. Please expect:
 - **no** windows or mac support (for now)
 
 A few recommendations:
-- read the changelog before you run `packer update`
+- read the [changelog][] before you run `packer update`
 - don't close the shell after a update until you verified new shells aren't broken
 - have a method of opening a bash or something to fix things
 - don't update nu to a new version until `packer.nu` officially supports it
@@ -17,7 +17,7 @@ A few recommendations:
 - create a github issue if you encounter a issue
 
 Supported nu-versions:
-- `0.68.1` - `0.70.0`
+- `0.69.0` - `0.70.0` (it might work in other version, but i only test 0.69.1 and 0.70.0)
 - not all plugins support all versions
 - it is recommended to use the latest supported version (which also supports your plugins)
 
@@ -60,9 +60,12 @@ Described in the Wiki.
 - [make][]: tab complete for make files
 - [tmux_autoattach][]: automatically attach tmux.
 
-
+<!-- internal -->
+[changelog]: https://github.com/Jan9103/packer.nu/wiki/CHANGELOG
+<!-- external -->
 [packer.nvim]: https://github.com/wbthomason/packer.nvim
 [NuShell]: https://github.com/nushell/nushell
+<!-- packages -->
 [starship]: https://github.com/jan9103/nushell_starship
 [zoxide]: https://github.com/jan9103/nushell_zoxide
 [inpw]: https://github.com/jan9103/nushell_inpw

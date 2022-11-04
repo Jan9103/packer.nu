@@ -38,7 +38,7 @@ def 'meta load' [
 	if ($file | path exists) {
 		let git_commit = (
 			if ($'($package.dir)/.git' | path exists) {
-				git log --oneline --no-abbrev-commit
+				^git log --oneline --no-abbrev-commit
 				| lines | get -i 0 | default 'NaN'
 			} else {'NaN'}
 		)
@@ -199,13 +199,19 @@ def generate_init_file [
 		# modules defined in meta.nuon files
 		(
 			$packages
-			| par-each {|i|
-				let meta_file = $'($i.dir)/meta.nuon'
+			| par-each {|package|
+				let meta_file = $'($package.dir)/meta.nuon'
 				if ($meta_file | path exists) {
-					open $meta_file
+					let meta = (open $meta_file)
+					$meta
 					| get -i modules | default []
 					| each {|module|
-						$'export use ($i.dir)/($module).nu'
+						$'export use ($package.dir)/($module).nu *'
+					}
+					$meta
+					| get -i prefixed_modules | default []
+					| each {|module|
+						$'export use ($package.dir)/($module).nu'
 					}
 				}
 			} | compact | flatten
@@ -231,9 +237,9 @@ export def install [
 				let URL = (
 					if ($package.source | str contains '://') {
 						$package.source
-					} else {$'https://github.com/($package.source)'}
+					} else {$'https://github.com/($package.source).git'}
 				)
-				git clone $URL $package.dir
+				^git clone --depth 1 --no-single-branch $URL $package.dir
 			}
 			if ($'($package.dir)/post_install.nu' | path exists) {
 				if $yes {
@@ -262,7 +268,7 @@ export def update [] {
 		if ($'($package.dir)/.git' | path exists) and (($package.dir | path type) == 'dir') {
 			print $' - ($package.name)'
 			cd $package.dir
-			^git pull -q --ff-only
+			^git pull -q --ff-only --rebase=false
 		}
 	}
 	compile  # TODO: deactivate via config
