@@ -17,7 +17,7 @@ A few recommendations:
 - create a github issue if you encounter a issue
 
 Supported nu-versions:
-- `0.69.0` - `0.70.0` (it might work in other version, but i only test 0.69.1 and 0.70.0)
+- `0.69.0` - `0.71.0` (it might work in other version, but i only test 0.69.1 and 0.71.0)
 - not all plugins support all versions
 - it is recommended to use the latest supported version (which also supports your plugins)
 
