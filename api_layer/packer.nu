@@ -203,16 +203,19 @@ def generate_init_file [
 				let meta_file = $'($package.dir)/meta.nuon'
 				if ($meta_file | path exists) {
 					let meta = (open $meta_file)
-					$meta
-					| get -i modules | default []
-					| each {|module|
-						$'export use ($package.dir)/($module).nu *'
-					}
-					$meta
-					| get -i prefixed_modules | default []
-					| each {|module|
-						$'export use ($package.dir)/($module).nu'
-					}
+					[(
+						$meta
+						| get -i modules | default []
+						| each {|module|
+							$'export use ($package.dir)/($module).nu *'
+						}
+					), (
+						$meta
+						| get -i prefixed_modules | default []
+						| each {|module|
+							$'export use ($package.dir)/($module).nu'
+						}
+					)] | flatten
 				}
 			} | compact | flatten
 		)
