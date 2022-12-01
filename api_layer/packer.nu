@@ -112,7 +112,7 @@ export def compile [] {
 			$package
 			| insert meta {meta load $package}
 		}
-		| find -p {|package|
+		| where {|package|
 			is_package_compatible $package $nu_version $packer_version
 		}
 	)
@@ -130,7 +130,7 @@ export def compile_cond_init [file: path] {
 		| where not deactivate
 		| where condition != null
 		| par-each {|package| $package | insert meta {meta load $package}}
-		| find -p {|package| (
+		| where {|package| (
 			(is_package_compatible $package $nu_version $packer_version
 			) and (
 				$package.condition
