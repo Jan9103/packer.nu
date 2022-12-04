@@ -37,10 +37,10 @@ Supported nu-versions:
     - `editor` (vim, emacs, nano, etc)
 - debug-information command to help with remote-debugging of packages
 - allow packages to add files to the `$env.NU_LIB_DIRS`
+- bootstrap packer.nu
 - [ ] allow packages to add files to the `$env.PATH`
 - [ ] package manpages
 - [ ] optional packages (load via command)
-- [ ] bootstrap
 - [ ] auto delete files of uninstalled packages
 
 ## Installation and Usage

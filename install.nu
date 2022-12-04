@@ -1,11 +1,16 @@
+let tilde_expansion_should_work = ($'/home/($env.USER)' == $env.HOME)
+
 let PACKER_REPO = 'https://github.com/jan9103/packer.nu'
 let NU_CONFIG_DIR = ($nu.config-path | path dirname)
-let PACKER_DIR = $'($env.HOME)/.local/share/nushell/packer'
+let PACKER_DIR = (
+	if $tilde_expansion_should_work { '~/.local/share/nushell/packer'
+	} else { $'($env.HOME)/.local/share/nushell/packer' }
+)
 let PACKER_PACKAGE_DIR = $'($PACKER_DIR)/start/packer.nu'
 
 for subdir in ['start', 'bin', 'lib'] {
 	mkdir $'($PACKER_DIR)/($subdir)'
-} | null
+}
 
 
 # append some lines to a file
@@ -48,13 +53,18 @@ if not ($'($PACKER_DIR)/conditional_packages.nu' | path exists) {
 	touch $'($PACKER_DIR)/conditional_packages.nu'
 }
 
-append_to_file $nu.env-path [
+append_to_file $nu.env-path ([
 	''
 	'### packer.nu ###'
-	'# this has to be in env and not config because it otherwise wouldnt get loaded if any plugin had any issue'
+	(if $tilde_expansion_should_work { [
+		'# bootstrap packer.nu'
+		$"if not \('($PACKER_PACKAGE_DIR)/api_layer/packer_api.nu' | path exists\) {"
+		'  nu -c (fetch https://raw.githubusercontent.com/jan9103/packer.nu/master/install.nu)'
+		'}'
+	] })
 	'# load packer api-layer'
 	$'overlay use ($"($PACKER_PACKAGE_DIR)/api_layer/packer_api.nu")'
-]
+] | flatten | compact)
 
 append_to_file $nu.config-path [
 	''
