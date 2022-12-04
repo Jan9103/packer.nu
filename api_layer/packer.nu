@@ -1,15 +1,33 @@
 def 'config load' [] {open $'($nu.env-path | path dirname)/packages.nuon'}
 
 # API-INTERFACE: Parse a package dnfinition from packages.nuon
+# default_git_host and default_git_repo_prefix are used:
+#   $'[(default_git_host)[/(default_git_repo_prefix)]/](user-input).git'
+#   with 'https://github.com' and 'jan9103' the following sources point to the same target:
+#   - https://github.com/jan9103/packer.nu.git
+#   - jan9103/packer.nu
+#   - packer.nu
 export def 'config parse package' [
 	package: record  # the package entry
+	default_git_host: string = 'https://github.com'  # the default git-host prefix used
+	default_git_repo_prefix: string = 'packer.nu'  # the default git-host url user/organisation prefix
 ] {
 	let name = (
 		$package | get -i as
 		| default ($package.source | path basename)
 	)
 	{
-		source: $package.source
+		source: (
+			if ($package.source | str substring [0,1]) in ['~', '/'] or ($package.source | str contains '://') {
+				$package.source
+			} else {
+				if '/' in $package.source {
+					$'($default_git_host)/($package.source).git'
+				} else {
+					$'($default_git_host)/($default_git_repo_prefix)/($package.source).git'
+				}
+			}
+		)
 		deactivate: ($package | get -i deactivate | default false)
 		freeze: ($package | get -i freeze | default false)
 		opt: ($package | get -i opt | default false)
@@ -26,9 +44,12 @@ export def 'config parse package' [
 
 # API-INTERFACE: Get packages defined in packages.nuon
 export def 'config get packages' [] {
-	config load
+	let config = (config load)
+	let default_git_host = ($config | get -i default_git_host | default 'https://github.com')
+	let default_git_repo_prefix = ($config | get -i default_git_repo_prefix | default 'packer.nu')
+	$config
 	| get -i packages | default []
-	| par-each {|package| config parse package $package}
+	| par-each {|package| config parse package $package $default_git_host $default_git_repo_prefix}
 }
 
 def 'meta load' [
@@ -237,12 +258,7 @@ export def install [
 				ln -s ($package.source | path expand) $package.dir
 			} else {
 				print '-> Downloading'
-				let URL = (
-					if ($package.source | str contains '://') {
-						$package.source
-					} else {$'https://github.com/($package.source).git'}
-				)
-				^git clone --depth 1 --no-single-branch $URL $package.dir
+				^git clone --depth 1 --no-single-branch $package.source $package.dir
 			}
 			if ($'($package.dir)/post_install.nu' | path exists) {
 				if $yes {

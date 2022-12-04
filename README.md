@@ -17,28 +17,26 @@ A few recommendations:
 - create a github issue if you encounter a issue
 
 Supported nu-versions:
-- `0.69.0` - `0.72.0` (it might work in other version, but i only test 0.69.1 and 0.71.0)
+- `0.69.0` - `0.72.0` (it might work in other version, but i only test 0.69.1 and 0.72.0)
 - not all plugins support all versions
 - it is recommended to use the latest supported version (which also supports your plugins)
 
 ## Features
 
-- [x] Install and Update packages from local or git
-	- [x] post-install scripts
-- [x] Load packages
-	- [x] Conditional (for example: only in a certain terminal)
-	- [x] only load if the package supports the nu version
-	- [ ] only load if the package supports the packer.nu version
-- [ ] A API-Layer for packages to ease development
-	- [ ] parsed versions of commands
-		- [x] rg
-	- [x] `$env.config` access management to prevent breaking other packages
-		- [x] for hooks
-	- [x] unified program arguments
-		- [x] `downloader` (curl, wget, aria2c, axel, etc)
-		- [x] `editor` (vim, emacs, nano, etc)
-- [x] debug-information command to help with remote-debugging of packages
-- [x] allow packages to add files to the `$env.NU_LIB_DIRS`
+- Install and Update packages from local or git
+  - post-install scripts
+- Load packages
+  - Conditional (for example: only in a certain terminal)
+  - only load if the package supports the nu and packer version
+- A API-Layer for packages to ease development
+  - parsed versions of commands (`rg`)
+  - `$env.config` access management to prevent breaking other packages
+    - for hooks
+  - unified program arguments
+    - `downloader` (curl, wget, aria2c, axel, etc)
+    - `editor` (vim, emacs, nano, etc)
+- debug-information command to help with remote-debugging of packages
+- allow packages to add files to the `$env.NU_LIB_DIRS`
 - [ ] allow packages to add files to the `$env.PATH`
 - [ ] package manpages
 - [ ] optional packages (load via command)
