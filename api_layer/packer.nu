@@ -202,7 +202,7 @@ def generate_init_file [
 			| par-each {|i|
 				let file = $'($i.dir)/env.nu'
 				if ($file | path exists) {
-					$'  source-env ($file)'
+					$'  use ($file)'
 				}
 			} | compact
 		)

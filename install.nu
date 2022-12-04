@@ -42,9 +42,7 @@ if not ($PACKER_PACKAGE_DIR | path exists) {
 
 # create a fallback loader, which loads packer
 if not ($'($PACKER_DIR)/packer_packages.nu' | path exists) {
-	$'#export-env {source-env ($PACKER_PACKAGE_DIR)/env.nu}
-#export use ($PACKER_PACKAGE_DIR)/packer.nu'
-	| save $'($PACKER_DIR)/packer_packages.nu'
+	touch $'($PACKER_DIR)/packer_packages.nu'
 }
 if not ($'($PACKER_DIR)/conditional_packages.nu' | path exists) {
 	touch $'($PACKER_DIR)/conditional_packages.nu'
