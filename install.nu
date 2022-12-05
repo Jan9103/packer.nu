@@ -8,10 +8,6 @@ let PACKER_DIR = (
 )
 let PACKER_PACKAGE_DIR = $'($PACKER_DIR)/start/packer.nu'
 
-for subdir in ['start', 'bin', 'lib'] {
-	mkdir $'($PACKER_DIR)/($subdir)'
-}
-
 
 # append some lines to a file
 def 'append_to_file' [
@@ -25,53 +21,59 @@ def 'append_to_file' [
 	| save $file
 }
 
-# create config file
-if not ($'($NU_CONFIG_DIR)/packages.nuon' | path exists) {
-	$"{\n\tpackages: [\n\t\t{source: '($PACKER_REPO)'}\n\t]\n}\n# vim: ft=nu"
-	[
-		'{'
-		'	packages: ['
-		$"		{source: '($PACKER_REPO)'}"
-		'	]'
-		'}'
-		'# vim: ft=nu'
+
+def main [] {
+	for subdir in ['start', 'bin', 'lib'] {
+		mkdir $'($PACKER_DIR)/($subdir)'
+	}
+
+	if not ($'($NU_CONFIG_DIR)/packages.nuon' | path exists) {
+		$"{\n\tpackages: [\n\t\t{source: '($PACKER_REPO)'}\n\t]\n}\n# vim: ft=nu"
+		[
+			'{'
+			'	packages: ['
+			$"		{source: '($PACKER_REPO)'}"
+			'	]'
+			'}'
+			'# vim: ft=nu'
+		]
+		| str join (char nl)
+		| save -r $'($NU_CONFIG_DIR)/packages.nuon'
+	}
+
+	# install packer as package
+	if not ($PACKER_PACKAGE_DIR | path exists) {
+		git clone $PACKER_REPO $PACKER_PACKAGE_DIR
+	}
+
+	# create a fallback loader, which loads packer
+	if not ($'($PACKER_DIR)/packer_packages.nu' | path exists) {
+		touch $'($PACKER_DIR)/packer_packages.nu'
+	}
+	if not ($'($PACKER_DIR)/conditional_packages.nu' | path exists) {
+		touch $'($PACKER_DIR)/conditional_packages.nu'
+	}
+
+	append_to_file $nu.env-path ([
+		''
+		'### packer.nu ###'
+		(if $tilde_expansion_should_work { [
+			'# bootstrap packer.nu'
+			$"if not \('($PACKER_PACKAGE_DIR)/api_layer/packer_api.nu' | path exists\) {"
+			'  nu -c (fetch https://raw.githubusercontent.com/jan9103/packer.nu/master/install.nu)'
+			'}'
+		] })
+		'# load packer api-layer'
+		$'overlay use ($"($PACKER_PACKAGE_DIR)/api_layer/packer_api.nu")'
+	] | flatten | compact)
+
+	append_to_file $nu.config-path [
+		''
+		'### packer.nu ###'
+		'# load plugins'
+		$'overlay use ($"($PACKER_DIR)/packer_packages.nu")'
+		'# load conditional packages'
+		$'packer compile_cond_init ($"($PACKER_DIR)/conditional_packages.nu")'
+		$'overlay use ($"($PACKER_DIR)/conditional_packages.nu")'
 	]
-	| str join (char nl)
-	| save -r $'($NU_CONFIG_DIR)/packages.nuon'
 }
-
-# install packer as package
-if not ($PACKER_PACKAGE_DIR | path exists) {
-	git clone $PACKER_REPO $PACKER_PACKAGE_DIR
-}
-
-# create a fallback loader, which loads packer
-if not ($'($PACKER_DIR)/packer_packages.nu' | path exists) {
-	touch $'($PACKER_DIR)/packer_packages.nu'
-}
-if not ($'($PACKER_DIR)/conditional_packages.nu' | path exists) {
-	touch $'($PACKER_DIR)/conditional_packages.nu'
-}
-
-append_to_file $nu.env-path ([
-	''
-	'### packer.nu ###'
-	(if $tilde_expansion_should_work { [
-		'# bootstrap packer.nu'
-		$"if not \('($PACKER_PACKAGE_DIR)/api_layer/packer_api.nu' | path exists\) {"
-		'  nu -c (fetch https://raw.githubusercontent.com/jan9103/packer.nu/master/install.nu)'
-		'}'
-	] })
-	'# load packer api-layer'
-	$'overlay use ($"($PACKER_PACKAGE_DIR)/api_layer/packer_api.nu")'
-] | flatten | compact)
-
-append_to_file $nu.config-path [
-	''
-	'### packer.nu ###'
-	'# load plugins'
-	$'overlay use ($"($PACKER_DIR)/packer_packages.nu")'
-	'# load conditional packages'
-	$'packer compile_cond_init ($"($PACKER_DIR)/conditional_packages.nu")'
-	$'overlay use ($"($PACKER_DIR)/conditional_packages.nu")'
-]
