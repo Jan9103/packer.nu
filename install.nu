@@ -54,26 +54,30 @@ def main [] {
 		touch $'($PACKER_DIR)/conditional_packages.nu'
 	}
 
-	append_to_file $nu.env-path ([
-		''
-		'### packer.nu ###'
-		(if $tilde_expansion_should_work { [
-			'# bootstrap packer.nu'
-			$"if not \('($PACKER_PACKAGE_DIR)/api_layer/packer_api.nu' | path exists\) {"
-			'  nu -c (fetch https://raw.githubusercontent.com/jan9103/packer.nu/master/install.nu)'
-			'}'
-		] })
-		'# load packer api-layer'
-		$'overlay use ($"($PACKER_PACKAGE_DIR)/api_layer/packer_api.nu")'
-	] | flatten | compact)
+	if not (open $nu.env-path | str contains "\n### packer.nu ###\n") {
+		append_to_file $nu.env-path ([
+			''
+			'### packer.nu ###'
+			(if $tilde_expansion_should_work { [
+				'# bootstrap packer.nu'
+				$"if not \('($PACKER_PACKAGE_DIR)/api_layer/packer_api.nu' | path exists\) {"
+				'  nu -c (fetch https://raw.githubusercontent.com/jan9103/packer.nu/master/install.nu)'
+				'}'
+			] })
+			'# load packer api-layer'
+			$'overlay use ($"($PACKER_PACKAGE_DIR)/api_layer/packer_api.nu")'
+		] | flatten | compact)
+	}
 
-	append_to_file $nu.config-path [
-		''
-		'### packer.nu ###'
-		'# load plugins'
-		$'overlay use ($"($PACKER_DIR)/packer_packages.nu")'
-		'# load conditional packages'
-		$'packer compile_cond_init ($"($PACKER_DIR)/conditional_packages.nu")'
-		$'overlay use ($"($PACKER_DIR)/conditional_packages.nu")'
-	]
+	if not (open $nu.config-path | str contains "\n### packer.nu ###\n") {
+		append_to_file $nu.config-path [
+			''
+			'### packer.nu ###'
+			'# load plugins'
+			$'overlay use ($"($PACKER_DIR)/packer_packages.nu")'
+			'# load conditional packages'
+			$'packer compile_cond_init ($"($PACKER_DIR)/conditional_packages.nu")'
+			$'overlay use ($"($PACKER_DIR)/conditional_packages.nu")'
+		]
+	}
 }
