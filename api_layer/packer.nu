@@ -277,17 +277,26 @@ export def install [
 }
 
 # update installed packages
-export def update [] {
+export def update [
+	--silent
+] {
 	# local repos are symlinks -> not updated
 	# manually added dirs dont have '.git/' -> not updated
-	print 'Updating packages:'
+	if not $silent { print 'Updating packages…' }
 	config get packages
 	| where freeze == false
 	| par-each {|package|
 		if ($'($package.dir)/.git' | path exists) and (($package.dir | path type) == 'dir') {
-			print $' - ($package.name)'
 			cd $package.dir
+			let old_head = (^git rev-parse HEAD)
 			^git pull -q --ff-only --rebase=false
+			if not $silent {
+				let new_head = (^git rev-parse HEAD)
+				if $old_head != $new_head {
+					# without the print it sometimes opens a pager
+					print $package.name (^git log --oneline --color --decorate=off $'($old_head)..HEAD')
+				}
+			}
 		}
 	}
 	compile  # TODO: deactivate via config
