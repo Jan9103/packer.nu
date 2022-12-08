@@ -1,4 +1,59 @@
-def 'config load' [] {open $'($nu.env-path | path dirname)/packages.nuon'}
+# get the origin head (default) branch name
+def 'gitutil default branch' [ directory: path ] {
+	open $"($directory)/.git/refs/remotes/origin/HEAD" | str trim
+	| parse 'ref: refs/remotes/origin/{branch}'
+	| get -i branch.0  # if detached return null
+}
+
+def 'gitutil current branch' [ directory: path ] {
+	open $"($directory)/.git/HEAD" | str trim
+	| parse 'ref: refs/heads/{branch}'
+	| get -i branch.0  # if detached return null
+}
+
+def 'gitutil auto checkout' [
+	package
+	quiet: bool = false
+] {
+	cd $package.dir
+	let target_commit = (
+		if $package.tag != null {
+			# always update in case it changed
+			^git fetch -q origin $"+refs/tags/($package.tag):refs/tags/($package.tag)"
+			open ".git/refs/tags/($package.tag)" | str trim
+		} else { $package.commit }
+	)
+	if $target_commit != null {
+		if (open ".git/HEAD" | str trim) != $target_commit {
+			^git fetch -q origin $target_commit
+			^git checkout -q $target_commit
+			if not $quiet {
+				print $'"($package.name)" switched to commit "($target_commit)"'
+			}
+		}
+	} else {
+		let current_branch = (gitutil current branch $package.dir)
+		let target_branch = (
+			if $package.branch == null {
+				gitutil default branch '.'
+			} else { $package.branch }
+		)
+		if $target_branch != $current_branch {
+			if not ($'.git/refs/heads/($target_branch)' | path exists) {
+				^git fetch -q origin $target_branch
+				^git branch -q $target_branch FETCH_HEAD
+			}
+			^git checkout -q $target_branch
+			if not $quiet {
+				print $'"($package.name)" switched to branch "($target_branch)"'
+			}
+		}
+	}
+}
+
+def 'config load' [] {
+	open $'($nu.env-path | path dirname)/packages.nuon'
+}
 
 # API-INTERFACE: Parse a package dnfinition from packages.nuon
 # default_git_host and default_git_repo_prefix are used:
@@ -39,6 +94,9 @@ export def 'config parse package' [
 		)
 		config: ($package | get -i config)
 		condition: ($package | get -i condition)
+		branch: ($package | get -i branch)
+		commit: ($package | get -i commit)
+		tag: ($package | get -i tag)
 	}
 }
 
@@ -248,17 +306,19 @@ def generate_init_file [
 # install the packages newly added to the packages.nuon
 export def install [
 	--yes(-y)  # DEPRECATED
+	--quiet(-q)
 ] {
 	config get packages
 	| par-each {|package|
 		if not ($package.dir | path exists) {
 			print $'Installing ($package.name)'
 			if ($package.source | str substring [0,1]) in ['~', '/'] {
-				print '-> Linking dir'
+				if not $quiet { print '-> Linking dir' }
 				ln -s ($package.source | path expand) $package.dir
 			} else {
-				print '-> Downloading'
+				if not $quiet { print '-> Downloading' }
 				^git clone --depth 1 --no-single-branch $package.source $package.dir
+				gitutil auto checkout $package $quiet
 			}
 			if ($'($package.dir)/post_install.nu' | path exists) {
 				print $'-> Running ($package.name) post install'
@@ -271,19 +331,20 @@ export def install [
 
 # update installed packages
 export def update [
-	--silent
+	--quiet(-q)
 ] {
 	# local repos are symlinks -> not updated
 	# manually added dirs dont have '.git/' -> not updated
-	if not $silent { print 'Updating packages…' }
+	if not $quiet { print 'Updating packages…' }
 	config get packages
 	| where freeze == false
 	| par-each {|package|
 		if ($'($package.dir)/.git' | path exists) and (($package.dir | path type) == 'dir') {
 			cd $package.dir
+			gitutil auto checkout $package $quiet
 			let old_head = (^git rev-parse HEAD)
 			^git pull -q --ff-only --rebase=false
-			if not $silent {
+			if not $quiet {
 				let new_head = (^git rev-parse HEAD)
 				if $old_head != $new_head {
 					# without the print it sometimes opens a pager
