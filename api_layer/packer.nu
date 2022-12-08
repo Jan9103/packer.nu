@@ -247,7 +247,7 @@ def generate_init_file [
 
 # install the packages newly added to the packages.nuon
 export def install [
-	--yes(-y)  # run post_install scripts without asking
+	--yes(-y)  # DEPRECATED
 ] {
 	config get packages
 	| par-each {|package|
@@ -261,15 +261,8 @@ export def install [
 				^git clone --depth 1 --no-single-branch $package.source $package.dir
 			}
 			if ($'($package.dir)/post_install.nu' | path exists) {
-				if $yes {
-					print '-> Running post install'
-					nu $'($package.dir)/post_install.nu'
-				} else {
-					if (input 'Run postinst? (y/n): ') in ['yes' 'y'] {
-						print '-> Running post install'
-						nu $'($package.dir)/post_install.nu'
-					}
-				}
+				print $'-> Running ($package.name) post install'
+				nu $'($package.dir)/post_install.nu'
 			}
 		} # end: if not dir exists
 	} # end: looping over packages
