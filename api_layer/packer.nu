@@ -173,7 +173,7 @@ def is_package_compatible [
 		((version_comparison $nu_version $max_nu_version) != '>')
 		((version_comparison $packer_version $min_packer_version) != '<')
 		((version_comparison $packer_version $max_packer_version) != '>')
-	] | all $it
+	] | all {|i| $i}
 }
 
 # (re-)generate the init-system
@@ -191,7 +191,7 @@ export def compile [] {
 			$package
 			| insert meta {meta load $package}
 		}
-		| where {|package|
+		| filter {|package|
 			is_package_compatible $package $nu_version $packer_version
 		}
 	)
@@ -216,7 +216,7 @@ export def compile_cond_init [file: path] {
 				| get -i env | default {}
 				| transpose k v
 				| each {|i| ($env | get -i $i.k) in $i.v}
-				| all $it
+				| all {|i| $i}
 			)
 		)}
 	)
@@ -300,12 +300,11 @@ def generate_init_file [
 		)
 	] | flatten
 	| str join (char nl)
-	| save $init_file
+	| save -f $init_file
 }
 
 # install the packages newly added to the packages.nuon
 export def install [
-	--yes(-y)  # DEPRECATED
 	--quiet(-q)
 ] {
 	config get packages

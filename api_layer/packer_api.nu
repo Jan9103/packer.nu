@@ -12,7 +12,8 @@ export-env {
 				| each {|i| [$i.k $i.v]}  # [[a b]]
 				| flatten  # [a b]
 			)
-			fetch -b -o $'($dir)/($file)' -H $headers -t $timeout $url
+			fetch -r -H $headers -t $timeout $url
+			| save -r $'($dir)/($file)'
 		}
 		editor: {|file,line|
 			let editor = ($env | get -i EDITOR)

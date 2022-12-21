@@ -2,7 +2,10 @@
 
 A [packer.nvim][] inspired package-manager for [NuShell][].
 
-Newest officially supported NuShell version: `0.72.x`
+Newest officially supported NuShell version: `0.73.x`
+
+Due to breaking changes to `all` in `nu v0.73` older versions are
+no longer supported by `packer.nu v0.3.0`.
 
 ## The issue this tries to solve:
 
