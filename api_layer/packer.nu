@@ -182,6 +182,7 @@ export def compile [] {
 	print 'Compiling init-system'  #' # <- fix TS syntax hightlight
 	let nu_version = (nu_version)
 	let packer_version = (packer_version)
+	let ignore_compatibility = (config load | get -i ignore_compatibility | default false)
 	let packages = (
 		config get packages
 		| where not opt
@@ -192,7 +193,10 @@ export def compile [] {
 			| insert meta {meta load $package}
 		}
 		| filter {|package|
-			is_package_compatible $package $nu_version $packer_version
+			(
+				$ignore_compatibility
+				or (is_package_compatible $package $nu_version $packer_version)
+			)
 		}
 	)
 	generate_init_file $packages $'($env.NU_PACKER_HOME)/packer_packages.nu'
@@ -203,6 +207,7 @@ export def compile [] {
 export def compile_cond_init [file: path] {
 	let nu_version = nu_version
 	let packer_version = (packer_version)
+	let ignore_compatibility = (config load | get -i ignore_compatibility | default false)
 	let packages = (
 		config get packages
 		| where not opt
@@ -210,7 +215,9 @@ export def compile_cond_init [file: path] {
 		| where condition != null
 		| par-each {|package| $package | insert meta {meta load $package}}
 		| where {|package| (
-			(is_package_compatible $package $nu_version $packer_version
+			(
+				$ignore_compatibility
+				or (is_package_compatible $package $nu_version $packer_version)
 			) and (
 				$package.condition
 				| get -i env | default {}
