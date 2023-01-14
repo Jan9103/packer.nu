@@ -18,7 +18,7 @@ def 'append_to_file' [
 	| lines
 	| append $lines
 	| str join (char nl)
-	| save $file
+	| save -f $file
 }
 
 
@@ -58,12 +58,14 @@ def main [] {
 		append_to_file $nu.env-path ([
 			''
 			'### packer.nu ###'
-			(if $tilde_expansion_should_work { [
-				'# bootstrap packer.nu'
-				$"if not \('($PACKER_PACKAGE_DIR)/api_layer/packer_api.nu' | path exists\) {"
-				'  nu -c (fetch https://raw.githubusercontent.com/jan9103/packer.nu/master/install.nu)'
-				'}'
-			] })
+			# Bootstrapping currently does not work since nu-script checks
+			# the existence of every used overlay pre execution
+			# (if $tilde_expansion_should_work { [
+			# 	'# bootstrap packer.nu'
+			# 	$"if not \('($PACKER_PACKAGE_DIR)/api_layer/packer_api.nu' | path exists\) {"
+			# 	'  nu -c (fetch https://raw.githubusercontent.com/jan9103/packer.nu/main/install.nu)'
+			# 	'}'
+			# ] })
 			'# load packer api-layer'
 			$'overlay use ($"($PACKER_PACKAGE_DIR)/api_layer/packer_api.nu")'
 		] | flatten | compact)
