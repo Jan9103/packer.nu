@@ -68,6 +68,8 @@ def main [] {
 			# ] })
 			'# load packer api-layer'
 			$'overlay use ($"($PACKER_PACKAGE_DIR)/api_layer/packer_api.nu")'
+			'# generate list for conditional packages'
+			$'packer compile_cond_init ($"($PACKER_DIR)/conditional_packages.nu")'
 		] | flatten | compact)
 	}
 
@@ -75,10 +77,9 @@ def main [] {
 		append_to_file $nu.config-path [
 			''
 			'### packer.nu ###'
-			'# load plugins'
+			'# load packages'
 			$'overlay use ($"($PACKER_DIR)/packer_packages.nu")'
 			'# load conditional packages'
-			$'packer compile_cond_init ($"($PACKER_DIR)/conditional_packages.nu")'
 			$'overlay use ($"($PACKER_DIR)/conditional_packages.nu")'
 		]
 	}
