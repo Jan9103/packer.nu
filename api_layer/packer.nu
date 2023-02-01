@@ -342,6 +342,7 @@ export def update [
 	# local repos are symlinks -> not updated
 	# manually added dirs dont have '.git/' -> not updated
 	if not $quiet { print 'Updating packages…' }
+	let header_color = ($env.config | get -i color_config.header | default green_bold)
 	config get packages
 	| where freeze == false
 	| par-each {|package|
@@ -354,7 +355,7 @@ export def update [
 				let new_head = (^git rev-parse HEAD)
 				if $old_head != $new_head {
 					# without the print it sometimes opens a pager
-					print $package.name (^git log --oneline --color --decorate=off $'($old_head)..HEAD')
+					print $'(ansi $header_color)($package.name)(ansi reset)' (^git log --oneline --color --decorate=off $'($old_head)..HEAD')
 				}
 			}
 		}
