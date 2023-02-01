@@ -12,7 +12,11 @@ export-env {
 				| each {|i| [$i.k $i.v]}  # [[a b]]
 				| flatten  # [a b]
 			)
-			fetch -r -H $headers -t $timeout $url
+			if (nu --version | split row '.' | get 1 | into int) >= 75 {
+				http get -r -H $headers -t $timeout $url
+			} else {
+				fetch -r -H $headers -t $timeout $url
+			}
 			| save -r $'($dir)/($file)'
 		}
 		editor: {|file,line|

@@ -63,7 +63,7 @@ def main [] {
 			# (if $tilde_expansion_should_work { [
 			# 	'# bootstrap packer.nu'
 			# 	$"if not \('($PACKER_PACKAGE_DIR)/api_layer/packer_api.nu' | path exists\) {"
-			# 	'  nu -c (fetch https://raw.githubusercontent.com/jan9103/packer.nu/main/install.nu)'
+			# 	'  nu -c (http get https://raw.githubusercontent.com/jan9103/packer.nu/main/install.nu)'
 			# 	'}'
 			# ] })
 			'# load packer api-layer'

@@ -2,10 +2,7 @@
 
 A [packer.nvim][] inspired package-manager for [NuShell][].
 
-Newest officially supported NuShell version: `0.74.x`
-
-Due to breaking changes to `all` in `nu v0.73` older versions are
-no longer supported by `packer.nu v0.3.0`.
+Newest officially supported NuShell version: `0.75.x`
 
 ## The issue this tries to solve:
 
@@ -34,7 +31,8 @@ A few examples for already existing packages:
 | Currently only GNU/Linux is officially supported (the `scope` section contains more details) |
 
 1. Open a NuShell instance
-2. run `nu -c (fetch https://raw.githubusercontent.com/jan9103/packer.nu/master/install.nu)`
+2. run `nu -c (http get https://raw.githubusercontent.com/jan9103/packer.nu/master/install.nu)`
+   - (prior to nu 0.75: `nu -c (fetch https://raw.githubusercontent.com/jan9103/packer.nu/master/install.nu)`)
 3. Reopen NuShell
 
 ## Basic Usage
