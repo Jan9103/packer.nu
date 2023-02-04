@@ -416,6 +416,19 @@ export def status [] {
 	print $'(ansi reset)'
 }
 
+# delete unused packages
+export def clean [] {
+	let used = (config get packages).name
+
+	for name in (ls -s $'($env.NU_PACKER_HOME)/start').name {
+		if not $name in $used {
+			print $'"($name)" is unused.'
+			rm -rpI $'($env.NU_PACKER_HOME)/start/($name)'
+		}
+	}
+	return
+}
+
 # manual pages
 # export def man [
 # 	page: string
