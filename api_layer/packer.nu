@@ -97,6 +97,7 @@ export def 'config parse package' [
 		branch: ($package | get -i branch)
 		commit: ($package | get -i commit)
 		tag: ($package | get -i tag)
+		disabled_modules: ($package | get -i disabled_modules | default [])
 	}
 }
 
@@ -292,12 +293,14 @@ def generate_init_file [
 					[(
 						$meta
 						| get -i modules | default []
+						| where not $it in $package.disabled_modules
 						| each {|module|
 							$'export use ($package.dir)/($module).nu *'
 						}
 					), (
 						$meta
 						| get -i prefixed_modules | default []
+						| where not $it in $package.disabled_modules
 						| each {|module|
 							$'export use ($package.dir)/($module).nu'
 						}
