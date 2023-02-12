@@ -3,7 +3,11 @@
 # - packer-api-layer features such as `parsed rg` for plugins
 
 export-env {
-	let-env NU_PACKER_HOME = $'($env.HOME)/.local/share/nushell/packer'
+	if ($env | get -i NU_PACKER_HOME) == null {
+		print $"(ansi ub)You have updated to packer.nu 0.4.\n(ansi ub)This version changed the attach method in order to allow bootstrapping, etc.\n(ansi rb)Please remove the packer section from (ansi lg)$.nu.config-path(ansi rb) and (ansi lg)$nu.env-path(ansi rb) and rerun the installer (ansi lg)nu -c \(http get https://raw.githubusercontent.com/jan9103/packer.nu/master/install.nu\)(ansi rb).(ansi reset)"
+	}
+	let-env NU_PACKER_HOME = ($env | get -i NU_PACKER_HOME | default $"($env.HOME)/.local/share/nushell/packer")
+
 	let-env NU_PACKER_UNIFIED = {
 		downloader: {|url,dir,file,headers,timeout|
 			let headers = (
