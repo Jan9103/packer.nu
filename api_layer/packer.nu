@@ -167,14 +167,16 @@ def is_package_compatible [
 	let min_packer_version = ($package.meta | get -i min_packer_version | default [0 0 0])
 	let max_packer_version = ($package.meta | get -i max_packer_version | default [9999 0 0])
 
-	[
+	let result = ([
 		($package.dir | path exists)  # filter not installed ones
 		# filter by min and max version
 		((version_comparison $nu_version $min_nu_version) != '<')
 		((version_comparison $nu_version $max_nu_version) != '>')
 		((version_comparison $packer_version $min_packer_version) != '<')
 		((version_comparison $packer_version $max_packer_version) != '>')
-	] | all {|i| $i}
+	] | all {|i| $i})
+	if not $result { print $'(ansi white_dimmed)Skipped: $package.name (incompatible version).(ansi reset)' }
+	$result
 }
 
 # (re-)generate the init-system
