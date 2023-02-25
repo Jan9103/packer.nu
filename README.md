@@ -2,50 +2,78 @@
 
 A [packer.nvim][] inspired package-manager for [NuShell][].
 
-Newest officially supported NuShell version: `0.75.x`
+Newest officially supported NuShell version: `0.76.x`
 
-## The issue this tries to solve:
+| :information_source: Please ensure to update nushell **after** packer supports the new version |
+| :--- |
 
-Currently a nushell config is almost always a giant, unstructured
-mess of outdated tab-completion snippets from many sources.
 
-Since vim package managers managed to solve this issue within vim
-fairly well and many people are already used to it this project
-is heavily inspired by a really good vim package manager: [packer.nvim][].
+## Version 0.4.0 is here:
 
-A few examples for already existing packages:
-- Auto attaching TMUX sessions
-- Background threads with pueue
-- Fixes for (partially) broken things, such as StreamPager
+Version 0.4 requires you to regenerate auto-attach code in you `$nu.config-path` and `$nu.env-path`:
+1. delete the `### packer.nu ###` section in both
+2. rerun the install script: `nu -c (http get https://raw.githubusercontent.com/jan9103/packer.nu/master/install.nu)`
+
+Changes:
+- added bootstrapping (just copy your dotfiles to a new computer and it'll install itself)
+- fixed issues with the install script
+
+## Why? What? How?
+
+Most nushell configs without a package-manager:
+- complicated and confusing
+  - everything in a few files or sourced in weird ways
+- half commented out
+  - broken over time
+  - currently not needed
+- half outdated (the author updated a snippet, but no one noticed)
+- missing features (to lazy to search for a working foo tab completion)
+
+The solution: copy a method, which works: the vim package management system.  
+Or to be more precise: the (at the project start) biggest system: [packer.nvim][].
+
+### Which packages exist?
+
+A few examples:
+- Tab completion for makefiles, shh, neovim, etc
 - Parsers for command outputs, such as pylint and docker
 - Prompts, such as starship
-- Python virtual environments
 - Quick navigation utilities
-- Tab completion for makefiles, shh, neovim, etc
+- Python virtual environments
+- Auto attaching TMUX sessions
+- Background threads with pueue
 
 ## Installation
 
-| :exclamation: Important notes |
-| :---------------------------- |
-| This project is currently in a fairly early stage and therefore probably contains a lot of bugs. |
-| Currently only GNU/Linux is officially supported (the `scope` section contains more details) |
+| :exclamation: Currently only GNU/Linux is officially supported. |
+| :-- |
 
-1. Open a NuShell instance
-2. run `nu -c (http get https://raw.githubusercontent.com/jan9103/packer.nu/master/install.nu)`
-   - (prior to nu 0.75: `nu -c (fetch https://raw.githubusercontent.com/jan9103/packer.nu/master/install.nu)`)
-3. Reopen NuShell
+Install command:
+
+Nu version | Command
+---------: | :------
+`>= 0.75`  | `nu -c (http get https://raw.githubusercontent.com/jan9103/packer.nu/master/install.nu)`
+`< 0.75`   | `nu -c (fetch https://raw.githubusercontent.com/jan9103/packer.nu/master/install.nu)`
+
+You have to reopen nu afterwards.
+
 
 ## Basic Usage
 
-| Note |
-| :--- |
-| You can use the inpw plugin ([GitHub][inpw GitHub], [CodeBerg][inpw CodeBerg]) as a alternative interface in case you prefer a apt-like interface with repositories |
-| A full documentation of the usage can be found in the wiki ([GitHub][wiki GitHub], [CodeBerg][wiki CodeBerg]). |
 
-You can specify which packages you want to use in the `packages.nuon`, which is located in your
-nushell config directory (on linux: `~/.config/nushell/packages.nuon`).
-The file is in the nuon file-format (in case you dont know it: json is valid nuon) and
-inspired by [packer.nvim][]'s syntax.
+### INPW
+
+The INPW package adds a alternative usage based on package-repositories and commands (similar to apt, pacman, etc)
+
+The usage and setup is explained on its [GitHub][inpw GitHub] and [CodeBerg](inpw CodeBerg) page.
+
+### Selecting and Configuring packages
+
+| :information_source: A full documentation of the usage can be found in the wiki ([GitHub][wiki GitHub], [CodeBerg][wiki CodeBerg]). |
+| :-- |
+
+
+`~/.config/nushell/packages.nuon` contains your package list and packer-configuration.  
 A example config:
 ```
 {
@@ -63,32 +91,45 @@ A example config:
 }
 ```
 
-After configuring your `packages.nuon` you can install the newly added packages with `packer install`
-within nushell.
+To install new packages run `packer install`.
 
-You can update the plugins with `packer update`.
+To update installed packages run `packer update`.
 
-### Updating with packer installed
 
-Updating NuShell should only be done after checking if the new version is already supported by packer and the plugins you use.  
-Packer usually supports new nushell versions within a week after their release.
+## Goals:
 
-If your nushell version is outdated you should not install new packages or run the update command,
-since its currently not possible to select which package version should be used and a new package
-version might not support your nushell version.
 
-If a package does not support your installed packer or nushell version it will be deactivated
-during the (next) update or install (or `packer compile`).
+### Packer
 
-## Scope (aka Goals and Non-Goals)
+- familiar [packer.nvim][] like usage
+- expandable (via packages)
+- maintainability between nu versions
+- support for the latest version (as well as the version before)
 
-**OS Support:** The primary target is GNU/Linux. If someone is interested they can create a MR adding support for something else, but i won't maintain the support since i only use Linux myself.
 
-**Nu Version Support:** The goal is to support the 2 latest versions (if 0.72.1 is the latest this tries to be compatible with 0.72.x and 0.71.x).
+### Package format
 
-**API layer scope:** The API layer is supposed to ease working with common interfaces, but should stay small in scope. The `lib` directory function can be used to write libraries for packer.
+- easy to pick up and write new packages
+- easy to write a (new) package-manager for
+- easy to maintain
+- version independent
 
-**Interface:** The inteface is supposed to stay as a config file with a few simple commands to update. A full CLI is implemented in the inpw plugin ([GitHub][inpw GitHub], [CodeBerg][inpw CodeBerg]).
+## FAQ
+
+**How about support for [insert Operating System]?**  
+Since i exclusively use linux (and android) i wont be able to properly maintain support.  
+If you are up for it (or just a one time fix) feel free to open a MergeRequest.
+
+**I need help with something, but don't want to open a git issue.**  
+There is a Matrix channel: [#packer.nu:matrix.org](https://matrix.to/#/#packer.nu:matrix.org)
+
+**Is it "production" ready?**  
+i have been [dogfooding](https://en.wikipedia.org/wiki/Eating_your_own_dog_food) it for
+quite some time now and only ever had issues during development and installation
+(which should now work better with v0.4).  
+Since nushell will be usable (without packages) even if packer is completely broken
+and nushell itself isn't quite stable/feature complete i would argue call it stable
+enough.
 
 
 ## Links
