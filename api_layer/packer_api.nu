@@ -16,7 +16,10 @@ export-env {
 				| each {|i| [$i.k $i.v]}  # [[a b]]
 				| flatten  # [a b]
 			)
-			if (nu --version | split row '.' | get 1 | into int) >= 75 {
+			let v = ((nu --version | split row '.').1 | into int)
+			if v > 75 {
+				http get -r -H $headers -m $timeout $url
+			} else if v == 75 {
 				http get -r -H $headers -t $timeout $url
 			} else {
 				fetch -r -H $headers -t $timeout $url
