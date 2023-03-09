@@ -175,7 +175,7 @@ def is_package_compatible [
 		((version_comparison $packer_version $min_packer_version) != '<')
 		((version_comparison $packer_version $max_packer_version) != '>')
 	] | all {|i| $i})
-	if not $result { print $'(ansi white_dimmed)Skipped: $package.name (incompatible version).(ansi reset)' }
+	if not $result { print $"(ansi white_dimmed)Skipped: ($package.name) \(incompatible version).(ansi reset)" }
 	$result
 }
 
