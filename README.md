@@ -2,21 +2,11 @@
 
 A [packer.nvim][] inspired package-manager for [NuShell][].
 
-Newest officially supported NuShell version: `0.76.x`
+Newest officially supported NuShell version: `0.77.x`
 
 | :information_source: Please ensure to update nushell **after** packer supports the new version |
 | :--- |
 
-
-## Version 0.4.0 is here:
-
-Version 0.4 requires you to regenerate auto-attach code in you `$nu.config-path` and `$nu.env-path`:
-1. delete the `### packer.nu ###` section in both
-2. rerun the install script: `nu -c (http get https://raw.githubusercontent.com/jan9103/packer.nu/master/install.nu)`
-
-Changes:
-- added bootstrapping (just copy your dotfiles to a new computer and it'll install itself)
-- fixed issues with the install script
 
 ## Why? What? How?
 
