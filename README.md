@@ -39,11 +39,7 @@ A few examples:
 | :-- |
 
 Install command:
-
-Nu version | Command
----------: | :------
-`>= 0.75`  | `nu -c (http get https://raw.githubusercontent.com/jan9103/packer.nu/master/install.nu)`
-`< 0.75`   | `nu -c (fetch https://raw.githubusercontent.com/jan9103/packer.nu/master/install.nu)`
+`nu -c (http get https://raw.githubusercontent.com/jan9103/packer.nu/master/install.nu)`
 
 You have to reopen nu afterwards.
 

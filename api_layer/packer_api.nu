@@ -17,13 +17,7 @@ export-env {
 				| flatten  # [a b]
 			)
 			let v = ((nu --version | split row '.').1 | into int)
-			if v > 75 {
-				http get -r -H $headers -m $timeout $url
-			} else if v == 75 {
-				http get -r -H $headers -t $timeout $url
-			} else {
-				fetch -r -H $headers -t $timeout $url
-			}
+			http get -r -H $headers -m $timeout $url
 			| save -r $'($dir)/($file)'
 		}
 		editor: {|file,line|
