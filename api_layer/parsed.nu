@@ -26,7 +26,7 @@ export def rg [
 	| parse '{file}:{line}:{column}:{content}'
 	| each {|i|
 		$i
-		| update line {$i.line | into int}
-		| update column {$i.column | into int}
+		| update line {|| $i.line | into int}
+		| update column {|| $i.column | into int}
 	}
 }

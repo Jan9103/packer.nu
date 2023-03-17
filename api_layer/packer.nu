@@ -193,7 +193,7 @@ export def compile [] {
 		| where condition == null
 		| par-each {|package|
 			$package
-			| insert meta {meta load $package}
+			| insert meta {|| meta load $package}
 		}
 		| filter {|package|
 			(
@@ -216,7 +216,7 @@ export def compile_cond_init [file: path] {
 		| where not opt
 		| where not deactivate
 		| where condition != null
-		| par-each {|package| $package | insert meta {meta load $package}}
+		| par-each {|package| $package | insert meta {|| meta load $package}}
 		| where {|package| (
 			(
 				$ignore_compatibility
