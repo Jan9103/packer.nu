@@ -208,7 +208,7 @@ export def compile [] {
 # not meant to be manually executed.
 # used to generate the init-system conditional packages
 export def compile_cond_init [file: path] {
-	let nu_version = nu_version
+	let nu_version = (nu_version)
 	let packer_version = (packer_version)
 	let ignore_compatibility = (config load | get -i ignore_compatibility | default false)
 	let packages = (
@@ -371,11 +371,11 @@ export def update [
 export def debuginfo [
 	package_name: string = ''
 ] {
-	let packages = config get packages
-	let packer_meta = meta load (
+	let packages = (config get packages)
+	let packer_meta = (meta load (
 		$packages
 		| where name == 'packer.nu' | get -i 0 | default {}
-	)
+	))
 	print $'Nu version: (nu --version | str trim)'
 	print $'OS: ($nu.os-info.name)'
 	print $'Packer version: ($packer_meta | get -i version | default "?")'
@@ -392,7 +392,7 @@ export def debuginfo [
 		} else {
 			print $package_name
 			print $'($package)'
-			let meta = meta load $package
+			let meta = (meta load $package)
 			if $meta != null {
 				print $'version: ($meta | get -i version | default "?")'
 				print $'git-commit: ($meta | get -i current_git_commit)'
