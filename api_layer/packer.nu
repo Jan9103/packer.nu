@@ -73,7 +73,7 @@ export def 'config parse package' [
 	)
 	{
 		source: (
-			if ($package.source | str substring [0,1]) in ['~', '/'] or ($package.source | str contains '://') {
+			if ($package.source | str substring 0..1) in ['~', '/'] or ($package.source | str contains '://') {
 				$package.source
 			} else {
 				if '/' in $package.source {
@@ -323,7 +323,7 @@ export def install [
 	| par-each {|package|
 		if not ($package.dir | path exists) {
 			print $'Installing ($package.name)'
-			if ($package.source | str substring [0,1]) in ['~', '/'] {
+			if ($package.source | str substring 0..1) in ['~', '/'] {
 				if not $quiet { print '-> Linking dir' }
 				ln -s ($package.source | path expand) $package.dir
 			} else {
