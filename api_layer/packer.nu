@@ -52,7 +52,7 @@ def 'gitutil auto checkout' [
 }
 
 def 'config load' [] {
-	open $'($nu.env-path | path dirname)/packages.nuon'
+	open $'($nu.history-path | path dirname)/packages.nuon'
 }
 
 # API-INTERFACE: Parse a package dnfinition from packages.nuon
