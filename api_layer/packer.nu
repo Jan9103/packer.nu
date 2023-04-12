@@ -118,7 +118,7 @@ def 'meta load' [
 	if ($file | path exists) {
 		let git_commit = (
 			if ($'($package.dir)/.git' | path exists) {
-				^git log --oneline --no-abbrev-commit
+				PWD=$package.dir ^git log --oneline --no-abbrev-commit
 				| lines | get -i 0 | default 'NaN'
 			} else {'NaN'}
 		)
