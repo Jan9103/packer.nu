@@ -7,7 +7,7 @@ print -n $'(ansi y)Setting up install env..'
 let tilde_expansion_should_work = ($'/home/($env.USER)' == $env.HOME)
 
 let PACKER_REPO = 'https://github.com/jan9103/packer.nu'
-let NU_CONFIG_DIR = ($nu.config-path | path dirname)
+let NU_CONFIG_DIR = ($nu.history-path | path dirname)
 let PACKER_DIR = (
 	if $tilde_expansion_should_work { '~/.local/share/nushell/packer'
 	} else { $'($env.HOME)/.local/share/nushell/packer' }
