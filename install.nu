@@ -60,7 +60,21 @@ if not ($PACKER_PACKAGE_DIR | path exists) {
 	print $'(ansi g)Git cloned packer.nu.'
 } else { print $'(ansi u)Already git cloned packer.nu.' }
 
-if not (open $nu.env-path | str contains "\n### packer.nu ###\n") {
+let regenerate_config = not (open $nu.config-path | str contains "\n### packer.nu ###\n")
+let regenerate_env = not (open $nu.env-path | str contains "\n### packer.nu ###\n")
+let enable_conditional_loading = (
+	if $regenerate_env {
+		print ''
+		print $'(ansi yb)Do you want to use conditional packages?(ansi reset)'
+		print $'(ansi y)  very few packages require it and it slows'
+		print $'(ansi y)  down your startup-time quite a bit.'
+		print $"(ansi y)  you can enable/disable it later by \(un-)commenting"
+		print $'(ansi y)  a line in your env.nu and config.nu each.'
+		input '(y/n)> '
+	} else {'y'}
+)
+
+if $regenerate_env {
 	print -n $'(ansi y)Adding packer load section to ($nu.env-path).'
 	append_to_file $nu.env-path ([
 		''
@@ -87,14 +101,18 @@ if not (open $nu.env-path | str contains "\n### packer.nu ###\n") {
 		'}'
 		'# compile conditional package loader'
 		"# conditional packages have to be generated in the env, since you can't generate and import in the same file."
-		$"nu -c 'use ($PACKER_DIR)/start/packer.nu/api_layer/packer.nu; packer compile_cond_init ($PACKER_DIR)/conditional_packages.nu'"
+		(if $enable_conditional_loading == 'y' {
+			$"nu -c 'use ($PACKER_DIR)/start/packer.nu/api_layer/packer.nu; packer compile_cond_init ($PACKER_DIR)/conditional_packages.nu'"
+		} else {
+			$"#nu -c 'use ($PACKER_DIR)/start/packer.nu/api_layer/packer.nu; packer compile_cond_init ($PACKER_DIR)/conditional_packages.nu'"
+		})
 
 		"if not ($'($env.NU_PACKER_HOME)/packer_packages.nu' | path exists) { 'export-env {}' | save $'($env.NU_PACKER_HOME)/packer_packages.nu' }"
 	] | flatten | compact)
 	print $'($RESET_LINE)(ansi g)Added packer load section to ($nu.env-path).'
 } else { print $'(ansi u)Skipped adding packer load section to ($nu.env-path) to avoid duplicates.' }
 
-if not (open $nu.config-path | str contains "\n### packer.nu ###\n") {
+if $regenerate_config {
 	print -n $'(ansi y)Adding packer load section to ($nu.config-path)..'
 	append_to_file $nu.config-path [
 		''
@@ -104,9 +122,17 @@ if not (open $nu.config-path | str contains "\n### packer.nu ###\n") {
 		'# load packages'
 		$'overlay use ($PACKER_DIR)/packer_packages.nu'
 		'# load conditional packages'
-		$'overlay use ($PACKER_DIR)/conditional_packages.nu'
+		(if $enable_conditional_loading == 'y' {
+			$'overlay use ($PACKER_DIR)/conditional_packages.nu'
+		} else {
+			$'#overlay use ($PACKER_DIR)/conditional_packages.nu'
+		})
 	]
 	print $'($RESET_LINE)(ansi g)Added packer load section to ($nu.config-path).'
 } else { print $'(ansi u)Skipped adding packer load section to ($nu.config-path) to avoid duplicates.' }
+
+if not ($'($ABS_PACKER_DIR)/conditional_packages.nu' | path exists) {
+	'export-env {}' | save -r $'($ABS_PACKER_DIR)/conditional_packages.nu'
+}
 
 print $'(ansi g)Finished install script.(ansi reset)'
