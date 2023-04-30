@@ -351,18 +351,27 @@ export def update [
 	config get packages
 	| where freeze == false
 	| par-each {|package|
+		mut update_info = [$'(ansi $header_color)($package.name)(ansi reset)']
+		# update git
 		if ($'($package.dir)/.git' | path exists) and (($package.dir | path type) == 'dir') {
 			cd $package.dir
 			gitutil auto checkout $package $quiet
 			let old_head = (^git rev-parse HEAD)
 			^git pull -q --ff-only --rebase=false
-			if not $quiet {
-				let new_head = (^git rev-parse HEAD)
-				if $old_head != $new_head {
-					# without the print it sometimes opens a pager
-					print $'(ansi $header_color)($package.name)(ansi reset)' (^git log --oneline --color --decorate=off $'($old_head)..HEAD')
-				}
+			let new_head = (^git rev-parse HEAD)
+			if $old_head != $new_head {
+				$update_info = ($update_info | append (^git log --oneline --color --decorate=off $'($old_head)..HEAD'))
 			}
+		}
+		# update script
+		let meta = (meta load $package)
+		if ($meta.update_script? != null) {
+			CWD=$package.dir ^nu $'($package.dir)/($meta.update_script)'
+			$update_info = ($update_info | append 'Ran update script')
+		}
+		# show update info
+		if not $quiet and ($update_info | len) > 1 {
+			print ($update_info | str join "\n")
 		}
 	}
 	compile  # TODO: deactivate via config
