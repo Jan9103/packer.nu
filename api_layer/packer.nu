@@ -366,7 +366,7 @@ export def update [
 		# update script
 		let meta = (meta load $package)
 		if ($meta.update_script? != null) {
-			CWD=$package.dir ^nu $'($package.dir)/($meta.update_script)'
+			PWD=$package.dir ^nu $'($package.dir)/($meta.update_script)'
 			$update_info = ($update_info | append 'Ran update script')
 		}
 		# show update info
