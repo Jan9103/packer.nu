@@ -347,7 +347,7 @@ export def update [
 	# local repos are symlinks -> not updated
 	# manually added dirs dont have '.git/' -> not updated
 	if not $quiet { print 'Updating packages…' }
-	let header_color = ($env.config | get -i color_config.header | default green_bold)
+	let header_color = ($env | get -i config.color_config.header | default green_bold)
 	config get packages
 	| where freeze == false
 	| par-each {|package|
