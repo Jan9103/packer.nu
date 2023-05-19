@@ -4,14 +4,24 @@ let RESET_LINE = $'(ansi esc)[0G(ansi esc)[K'
 print $'(ansi g)Installing packer.nu.'
 print $'(ansi g)====================='
 print -n $'(ansi y)Setting up install env..'
-let tilde_expansion_should_work = ($'/home/($env.USER)' == $env.HOME)
 
 let PACKER_REPO = 'https://github.com/jan9103/packer.nu'
 let NU_CONFIG_DIR = ($nu.history-path | path dirname)
-let PACKER_DIR = (
-	if $tilde_expansion_should_work { '~/.local/share/nushell/packer'
-	} else { $'($env.HOME)/.local/share/nushell/packer' }
-)
+
+let IS_WINDOWS = ($nu.os-info.family == 'windows')
+
+let PACKER_DIR = if not $IS_WINDOWS { 
+	if ($'/home/($env.USER)' == $env.HOME) { 
+		'~/.local/share/nushell/packer'
+	} else { 
+		$'($env.HOME)/.local/share/nushell/packer' 
+	}
+} else {
+	# Windows nushell data dir is $env.APPDATA/nushell
+	$'($env.APPDATA)/nushell/packer'
+}
+
+
 let PACKER_PACKAGE_DIR = $'($PACKER_DIR)/start/packer.nu'
 let ABS_PACKER_DIR = ($PACKER_DIR | path expand)
 let ABS_PACKER_PACKAGE_DIR = ($PACKER_PACKAGE_DIR | path expand)
@@ -51,6 +61,8 @@ if not ($'($NU_CONFIG_DIR)/packages.nuon' | path exists) {
 	| save -r $'($NU_CONFIG_DIR)/packages.nuon'
 	print $'($RESET_LINE)(ansi g)Created default packages.nuon.'
 } else { print $'(ansi b)kept existing packages.nuon.' }
+
+return
 
 # install packer as package
 if not ($PACKER_PACKAGE_DIR | path exists) {
