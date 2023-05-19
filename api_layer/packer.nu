@@ -325,7 +325,11 @@ export def install [
 			print $'Installing ($package.name)'
 			if ($package.source | str substring 0..1) in ['~', '/'] {
 				if not $quiet { print '-> Linking dir' }
-				ln -s ($package.source | path expand) $package.dir
+				if ((sys).host.name == 'Windows') {
+					mklink /d ($package.source | path expand) $package.dir
+				} else {
+					ln -s ($package.source | path expand) $package.dir
+				}
 			} else {
 				if not $quiet { print '-> Downloading' }
 				^git clone --depth 1 --no-single-branch $package.source $package.dir
