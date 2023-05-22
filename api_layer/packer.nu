@@ -325,7 +325,7 @@ export def install [
 			print $'Installing ($package.name)'
 			if ($package.source | str substring 0..1) in ['~', '/'] {
 				if not $quiet { print '-> Linking dir' }
-				if ((sys).host.name == 'Windows') {
+				if ($nu.os-info.family == 'windows') {
 					mklink /d ($package.source | path expand) $package.dir
 				} else {
 					ln -s ($package.source | path expand) $package.dir
