@@ -8,6 +8,7 @@ print -n $'(ansi y)Setting up install env..'
 let PACKER_REPO = 'https://github.com/jan9103/packer.nu'
 let NU_CONFIG_DIR = ($nu.history-path | path dirname)
 
+# true if windows, false if GNU/Linux
 let IS_WINDOWS = ($nu.os-info.family == 'windows')
 
 let PACKER_DIR = if not $IS_WINDOWS { 
@@ -60,9 +61,7 @@ if not ($'($NU_CONFIG_DIR)/packages.nuon' | path exists) {
 	| str join (char nl)
 	| save -r $'($NU_CONFIG_DIR)/packages.nuon'
 	print $'($RESET_LINE)(ansi g)Created default packages.nuon.'
-} else { print $'(ansi b)kept existing packages.nuon.' }
-
-return
+} else { print $'(ansi b)Kept existing packages.nuon.' }
 
 # install packer as package
 if not ($PACKER_PACKAGE_DIR | path exists) {
@@ -70,7 +69,7 @@ if not ($PACKER_PACKAGE_DIR | path exists) {
 	mkdir $'($ABS_PACKER_DIR)/start'
 	^git clone $PACKER_REPO $ABS_PACKER_PACKAGE_DIR
 	print $'(ansi g)Git cloned packer.nu.'
-} else { print $'(ansi u)Already git cloned packer.nu.' }
+} else { print $'(ansi u)Already git cloned packer.nu.(ansi reset)' }
 
 let regenerate_config = not (open $nu.config-path | str contains "\n### packer.nu ###\n")
 let regenerate_env = not (open $nu.env-path | str contains "\n### packer.nu ###\n")
