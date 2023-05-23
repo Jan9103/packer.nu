@@ -73,7 +73,7 @@ export def 'config parse package' [
 	)
 	{
 		source: (
-			if ($package.source | str substring 0..1) in ['~', '/'] or ($package.source | str contains '://') {
+			if ($package.source | str substring 0..1) in ['~', '/', '\'] or ($package.source | str contains '://') or ($package.source =~ '^[a-zA-Z]:') {
 				$package.source
 			} else {
 				if '/' in $package.source {
@@ -323,12 +323,16 @@ export def install [
 	| par-each {|package|
 		if not ($package.dir | path exists) {
 			print $'Installing ($package.name)'
-			if ($package.source | str substring 0..1) in ['~', '/'] {
+			if (($package.source | str substring 0..1) in ['~', '/', '\']) or ($package.source =~ '^[a-zA-Z]:') {
 				if not $quiet { print '-> Linking dir' }
-				if ($nu.os-info.family == 'windows') {
-					mklink /d ($package.source | path expand) $package.dir
+				if ($package.source | path exists) {	
+					if ($nu.os-info.family == 'windows') {
+						^mklink /d ($package.source | path expand) $package.dir
+					} else {
+						ln -s ($package.source | path expand) $package.dir
+					}
 				} else {
-					ln -s ($package.source | path expand) $package.dir
+					print -e $"(ansi r)Failed to link (ansi rb)($package.source)(ansi r) due to the folder being absent(ansi reset)"
 				}
 			} else {
 				if not $quiet { print '-> Downloading' }
