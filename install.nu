@@ -3,6 +3,15 @@ let RESET_LINE = $'(ansi esc)[0G(ansi esc)[K'
 # ESC[0G = jump to beginning of line; ESC[K = erase line
 print $'(ansi g)Installing packer.nu.'
 print $'(ansi g)====================='
+
+# Check if git is installed
+try {
+	^git --version out+err> $null
+} catch {
+	print $'(ansi r)Git is required to use packer.nu. Please install git and then retry installation.'
+	exit 1
+}
+
 print -n $'(ansi y)Setting up install env..'
 
 let PACKER_REPO = 'https://github.com/jan9103/packer.nu'
