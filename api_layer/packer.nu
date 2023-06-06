@@ -90,7 +90,9 @@ export def 'config parse package' [
 		dir: (
 			if ($package | get -i opt | default false) {
 				$'($env.NU_PACKER_HOME)/opt/($name)'
-			} else {$'($env.NU_PACKER_HOME)/start/($name)'}
+			} else { 
+				$'($env.NU_PACKER_HOME)/start/($name)'
+			}
 		)
 		config: ($package | get -i config)
 		condition: ($package | get -i condition)
@@ -327,7 +329,7 @@ export def install [
 				if not $quiet { print '-> Linking dir' }
 				if ($package.source | path exists) {	
 					if ($nu.os-info.family == 'windows') {
-						^mklink /d ($package.source | path expand) $package.dir
+						^mklink /d $'"($package.dir | path expand | str replace '/' '\' --all)"' $'"($package.source | path expand | str replace '/' '\' --all)"'
 					} else {
 						ln -s ($package.source | path expand) $package.dir
 					}
