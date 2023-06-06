@@ -27,8 +27,8 @@ let PACKER_DIR = if not $IS_WINDOWS {
 		$'($env.HOME)/.local/share/nushell/packer' 
 	}
 } else {
-	# Windows nushell data dir is ~/AppData/Roaming/nushell
-	$'($env.APPDATA)/nushell/packer'
+	# Windows nushell data dir is ~/AppData/Local/nushell
+	$'($env.LOCALAPPDATA)/nushell/packer'
 }
 
 
