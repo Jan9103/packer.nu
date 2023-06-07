@@ -181,6 +181,25 @@ def is_package_compatible [
 	$result
 }
 
+# Create a symlink
+def symlink [
+	file: string
+	link: string
+] {
+	# Remove any existing link - Just in case
+	if ($link | path exists) { rm $link }
+
+	# Create the link - OS specific
+	if ($nu.os-info.family = 'windows') {
+		# Windows
+		# Path strings require additional sanitization for mklink
+		^mklink /D $'"($link | path expand | str replace '/' '\' --all)"' $'"($file | path expand | str replace '/' '\' --all)"'
+	} else {
+		# Linux/Mac/BSD
+		ln -s $file $link
+	}
+}
+
 # (re-)generate the init-system
 # is automatically executed after install and update
 export def compile [] {
@@ -328,11 +347,7 @@ export def install [
 			if (($package.source | str substring 0..1) in ['~', '/', '\']) or ($package.source =~ '^[a-zA-Z]:') {
 				if not $quiet { print '-> Linking dir' }
 				if ($package.source | path exists) {	
-					if ($nu.os-info.family == 'windows') {
-						^mklink /d $'"($package.dir | path expand | str replace '/' '\' --all)"' $'"($package.source | path expand | str replace '/' '\' --all)"'
-					} else {
-						ln -s ($package.source | path expand) $package.dir
-					}
+					symlink $package.source $package.dir
 				} else {
 					print -e $"(ansi r)Failed to link (ansi rb)($package.source)(ansi r) due to the folder being absent(ansi reset)"
 				}
