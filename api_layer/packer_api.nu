@@ -23,16 +23,44 @@ export-env {
 		editor: {|file,line|
 			let editor = ($env | get -i EDITOR)
 			let editor = (
-				if $editor in ['vi', 'vim', 'nvim', 'emacs', 'ne'] { $editor
-				} else { 'nano' }
+				if $editor in ['vi', 'vim', 'nvim', 'emacs', 'ne', 'micro', 'nano', 'code'] { 
+					$editor
+				} else { 
+					if ($nu.os-info == 'windows') {
+						'notepad' # Nano isn't installed by default on windows
+					} else {
+						'nano' # Nano also appears in the list above because it could be installed on windows
+					}
+				}
 			)
-			nu -c ([
-				$editor
-				(if $line != null {$"+($line)"})
-				($file | into string | to json)  # escape spaces, etc
-			] | compact | str join ' ')
+
+			let file = ($file | into string | to json)
+
+			# Different editors have different syntax
+			let editor_cmd = if ($editor == 'notepad') {
+				[
+					notepad # notepad has a very limited CLI and doesnt support line numbers
+					$file
+				]
+			} else if ($editor == 'code') {
+				[
+					code
+					(if $line != null {$"--goto ($file):($line)"} else { $file }) 
+					--wait # wait for vscode to close
+				]
+			} else {
+				[
+					$editor
+					(if $line != null {$"+($line)"})
+					$file
+				]
+			}
+
+			# Invoke editor
+			nu -c ($editor_cmd | compact | str join ' ')
 		}
 	}
+
 	let-env config = (
 		# Broken ?
 		# `let-env TEST = 'FOO'` dosnt work afterwards
