@@ -3,15 +3,35 @@ let RESET_LINE = $'(ansi esc)[0G(ansi esc)[K'
 # ESC[0G = jump to beginning of line; ESC[K = erase line
 print $'(ansi g)Installing packer.nu.'
 print $'(ansi g)====================='
+
+# Check if git is installed
+try {
+	^git --version | null
+} catch {
+	print $'(ansi r)Git is required to use packer.nu. Please install git and then retry installation.'
+	exit 1
+}
+
 print -n $'(ansi y)Setting up install env..'
-let tilde_expansion_should_work = ($'/home/($env.USER)' == $env.HOME)
 
 let PACKER_REPO = 'https://github.com/jan9103/packer.nu'
 let NU_CONFIG_DIR = ($nu.history-path | path dirname)
-let PACKER_DIR = (
-	if $tilde_expansion_should_work { '~/.local/share/nushell/packer'
-	} else { $'($env.HOME)/.local/share/nushell/packer' }
-)
+
+# true if windows, false if GNU/Linux
+let IS_WINDOWS = ($nu.os-info.family == 'windows')
+
+let PACKER_DIR = if not $IS_WINDOWS { 
+	if ($'/home/($env.USER)' == $env.HOME) { 
+		'~/.local/share/nushell/packer'
+	} else { 
+		$'($env.HOME)/.local/share/nushell/packer' 
+	}
+} else {
+	# Windows nushell data dir is ~/AppData/Local/nushell
+	$'($env.LOCALAPPDATA)/nushell/packer'
+}
+
+
 let PACKER_PACKAGE_DIR = $'($PACKER_DIR)/start/packer.nu'
 let ABS_PACKER_DIR = ($PACKER_DIR | path expand)
 let ABS_PACKER_PACKAGE_DIR = ($PACKER_PACKAGE_DIR | path expand)
@@ -50,7 +70,7 @@ if not ($'($NU_CONFIG_DIR)/packages.nuon' | path exists) {
 	| str join (char nl)
 	| save -r $'($NU_CONFIG_DIR)/packages.nuon'
 	print $'($RESET_LINE)(ansi g)Created default packages.nuon.'
-} else { print $'(ansi b)kept existing packages.nuon.' }
+} else { print $'(ansi b)Kept existing packages.nuon.' }
 
 # install packer as package
 if not ($PACKER_PACKAGE_DIR | path exists) {
@@ -58,7 +78,7 @@ if not ($PACKER_PACKAGE_DIR | path exists) {
 	mkdir $'($ABS_PACKER_DIR)/start'
 	^git clone $PACKER_REPO $ABS_PACKER_PACKAGE_DIR
 	print $'(ansi g)Git cloned packer.nu.'
-} else { print $'(ansi u)Already git cloned packer.nu.' }
+} else { print $'(ansi u)Already git cloned packer.nu.(ansi reset)' }
 
 let regenerate_config = not (open $nu.config-path | str contains "\n### packer.nu ###\n")
 let regenerate_env = not (open $nu.env-path | str contains "\n### packer.nu ###\n")

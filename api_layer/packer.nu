@@ -73,7 +73,7 @@ export def 'config parse package' [
 	)
 	{
 		source: (
-			if ($package.source | str substring 0..1) in ['~', '/'] or ($package.source | str contains '://') {
+			if ($package.source | str substring 0..1) in ['~', '/', '\'] or ($package.source | str contains '://') or ($package.source =~ '^[a-zA-Z]:') {
 				$package.source
 			} else {
 				if '/' in $package.source {
@@ -90,7 +90,9 @@ export def 'config parse package' [
 		dir: (
 			if ($package | get -i opt | default false) {
 				$'($env.NU_PACKER_HOME)/opt/($name)'
-			} else {$'($env.NU_PACKER_HOME)/start/($name)'}
+			} else { 
+				$'($env.NU_PACKER_HOME)/start/($name)'
+			}
 		)
 		config: ($package | get -i config)
 		condition: ($package | get -i condition)
@@ -177,6 +179,25 @@ def is_package_compatible [
 	] | all {|i| $i})
 	if not $result { print $"(ansi white_dimmed)Skipped: ($package.name) \(incompatible version).(ansi reset)" }
 	$result
+}
+
+# Create a symlink
+def symlink [
+	file: string
+	link: string
+] {
+	# Remove any existing link - Just in case
+	if ($link | path exists) { rm $link }
+
+	# Create the link - OS specific
+	if ($nu.os-info.family = 'windows') {
+		# Windows
+		# Path strings require additional sanitization for mklink
+		^mklink /D $'"($link | path expand | str replace '/' '\' --all)"' $'"($file | path expand | str replace '/' '\' --all)"'
+	} else {
+		# Linux/Mac/BSD
+		ln -s $file $link
+	}
 }
 
 # (re-)generate the init-system
@@ -323,9 +344,13 @@ export def install [
 	| par-each {|package|
 		if not ($package.dir | path exists) {
 			print $'Installing ($package.name)'
-			if ($package.source | str substring 0..1) in ['~', '/'] {
+			if (($package.source | str substring 0..1) in ['~', '/', '\']) or ($package.source =~ '^[a-zA-Z]:') {
 				if not $quiet { print '-> Linking dir' }
-				ln -s ($package.source | path expand) $package.dir
+				if ($package.source | path exists) {	
+					symlink $package.source $package.dir
+				} else {
+					print -e $"(ansi r)Failed to link (ansi rb)($package.source)(ansi r) due to the folder being absent(ansi reset)"
+				}
 			} else {
 				if not $quiet { print '-> Downloading' }
 				^git clone --depth 1 --no-single-branch $package.source $package.dir
