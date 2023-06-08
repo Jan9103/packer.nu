@@ -35,8 +35,7 @@ A few examples:
 
 ## Installation
 
-| :exclamation: Currently only GNU/Linux is officially supported. |
-| :-- |
+Notice: It works on GNU/Linux and Windows, but macos and bsd are probably similar enough to work as well.
 
 Install command:
 `nu -c (http get https://raw.githubusercontent.com/jan9103/packer.nu/master/install.nu)`
@@ -102,8 +101,8 @@ To update installed packages run `packer update`.
 
 ## FAQ
 
-**How about support for [insert Operating System]?**  
-Since i exclusively use linux (and android) i wont be able to properly maintain support.  
+**[Insert Operating System] has a issue?**  
+Since i exclusively use linux (and android) can't properly maintain support myself.  
 If you are up for it (or just a one time fix) feel free to open a MergeRequest.
 
 **I need help with something, but don't want to open a git issue.**  
