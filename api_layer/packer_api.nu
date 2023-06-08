@@ -6,7 +6,14 @@ export-env {
 	if ($env | get -i NU_PACKER_HOME) == null {
 		print $"(ansi ub)You have updated to packer.nu 0.4.\n(ansi ub)This version changed the attach method in order to allow bootstrapping, etc.\n(ansi rb)Please remove the packer section from (ansi lg)$.nu.config-path(ansi rb) and (ansi lg)$nu.env-path(ansi rb) and rerun the installer (ansi lg)nu -c \(http get https://raw.githubusercontent.com/jan9103/packer.nu/master/install.nu\)(ansi rb).(ansi reset)"
 	}
-	let-env NU_PACKER_HOME = ($env | get -i NU_PACKER_HOME | default $"($env.HOME)/.local/share/nushell/packer")
+	
+	let IS_WINDOWS = ($nu.os-info.family == 'windows')
+
+	let-env NU_PACKER_HOME = ($env | get -i NU_PACKER_HOME | default (if ($IS_WINDOWS) { 
+		$'($env.LOCALAPPDATA)/nushell/packer' 
+	} else {
+		$"($env.HOME)/.local/share/nushell/packer" 
+	}))
 
 	let-env NU_PACKER_UNIFIED = {
 		downloader: {|url,dir,file,headers,timeout|
@@ -26,38 +33,41 @@ export-env {
 				if $editor in ['vi', 'vim', 'nvim', 'emacs', 'ne', 'micro', 'nano', 'code'] { 
 					$editor
 				} else { 
-					if ($nu.os-info == 'windows') {
+					if ($IS_WINDOWS) {
 						'notepad' # Nano isn't installed by default on windows
+						# NOTE: It is possible to have a windows install without notepad
 					} else {
-						'nano' # Nano also appears in the list above because it could be installed on windows
+						'nano' # Nano also appears in the list above as it can be installed on windows
 					}
 				}
 			)
 
-			let file = ($file | into string | to json)
+			let file = ($file | into string)
 
-			# Different editors have different syntax
-			let editor_cmd = if ($editor == 'notepad') {
+			nu -c ((if ($editor == 'notepad') { # Notepad
+				print $"(ansi c)Waiting for Notepad to close...(ansi reset)" # Message to user
 				[
-					notepad # notepad has a very limited CLI and doesnt support line numbers
-					$file
+					notepad # notepad has a very limited CLI and doesn't support line numbers
+					($file | to json)
 				]
-			} else if ($editor == 'code') {
+			} else if ($editor == 'code') { # VSCode or VSCodium
+				print $"(ansi c)Waiting for Code to close the file...(ansi reset)" # Message to user
 				[
 					code
-					(if $line != null {$"--goto ($file):($line)"} else { $file }) 
-					--wait # wait for vscode to close
+					(if ($line != null) {
+						$"--goto '($file):($line)'" # Don't cast to json. The quotes need to wrap the line number
+					} else { 
+						($file | to json)
+					})
+					--wait 
 				]
-			} else {
+			} else { # Default for most editors
 				[
 					$editor
-					(if $line != null {$"+($line)"})
-					$file
+					(if ($line != null) {$"+($line)"})
+					($file | to json)
 				]
-			}
-
-			# Invoke editor
-			nu -c ($editor_cmd | compact | str join ' ')
+			}) | compact | str join ' ')
 		}
 	}
 
