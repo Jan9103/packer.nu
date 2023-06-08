@@ -6,7 +6,7 @@ print $'(ansi g)====================='
 
 # Check if git is installed
 try {
-	^git --version out+err> $null
+	^git --version | null
 } catch {
 	print $'(ansi r)Git is required to use packer.nu. Please install git and then retry installation.'
 	exit 1
