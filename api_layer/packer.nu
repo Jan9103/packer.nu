@@ -196,7 +196,7 @@ def symlink [
 		^mklink /D $'"($link | path expand | str replace '/' '\' --all)"' $'"($file | path expand | str replace '/' '\' --all)"' #"
 	} else {
 		# Linux/Mac/BSD
-		ln -s $file $link
+		^ln -s ($file | path expand) ($link | path expand)
 	}
 }
 
