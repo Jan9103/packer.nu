@@ -190,10 +190,10 @@ def symlink [
 	if ($link | path exists) { rm $link }
 
 	# Create the link - OS specific
-	if ($nu.os-info.family = 'windows') {
+	if ($nu.os-info.family == 'windows') {
 		# Windows
 		# Path strings require additional sanitization for mklink
-		^mklink /D $'"($link | path expand | str replace '/' '\' --all)"' $'"($file | path expand | str replace '/' '\' --all)"'
+		^mklink /D $'"($link | path expand | str replace '/' '\' --all)"' $'"($file | path expand | str replace '/' '\' --all)"' #"
 	} else {
 		# Linux/Mac/BSD
 		ln -s $file $link
