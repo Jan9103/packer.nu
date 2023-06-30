@@ -284,8 +284,10 @@ def generate_init_file [
 		# env.nu files
 		# TODO: @deprecated
 		'export-env {' #'
-		$"  let-env NU_LIB_DIRS = \($env | get -i NU_LIB_DIRS | default [] | append [($lib_dirs)]\)"
-		$'  let-env NU_PACKER_CFG = ($package_configs)'
+		"  load-env {"
+		$"    NU_LIB_DIRS: \($env | get -i NU_LIB_DIRS | default [] | append [($lib_dirs)]\)"
+		$'    NU_PACKER_CFG: ($package_configs)'
+		'  }'
 		(
 			$packages
 			| par-each {|i|

@@ -2,18 +2,18 @@
 export def-env 'hook append pre_prompt' [
 	block: block  # the code-block - example: {print 'foo'}
 ] {
-	let-env config = ($env.config | upsert hooks.pre_prompt {|config|
+	load-env {config: ($env.config | upsert hooks.pre_prompt {|config|
 		$config | get -i hooks.pre_prompt | default [] | append $block
-	})
+	})}
 }
 
 # append a pre-execution hook to the config
 export def-env 'hook append pre_execution' [
 	block: block  # the code-block - example: {print 'foo'}
 ] {
-	let-env config = ($env.config | upsert hooks.pre_execution {|config|
+	load-env {config: ($env.config | upsert hooks.pre_execution {|config|
 		$config | get -i hooks.pre_execution | default [] | append $block
-	})
+	})}
 }
 
 # append a env-change hook to the config
@@ -29,7 +29,7 @@ export def-env 'hook append env_change' [
 	variable_name: string
 	content
 ] {
-	let-env config = ($env.config | upsert hooks.env_change {|config|
+	load-env {config: ($env.config | upsert hooks.env_change {|config|
 		(
 			$config
 			| get -i hooks.env_change | default {}
@@ -37,5 +37,5 @@ export def-env 'hook append env_change' [
 				$envc | get -i $variable_name | default [] | append $content
 			}
 		)
-	})
+	})}
 }

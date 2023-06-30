@@ -9,13 +9,13 @@ export-env {
 	
 	let IS_WINDOWS = ($nu.os-info.family == 'windows')
 
-	let-env NU_PACKER_HOME = ($env | get -i NU_PACKER_HOME | default (if ($IS_WINDOWS) { 
+	load-env {NU_PACKER_HOME: ($env | get -i NU_PACKER_HOME | default (if ($IS_WINDOWS) { 
 		$'($env.LOCALAPPDATA)/nushell/packer' 
 	} else {
 		$"($env.HOME)/.local/share/nushell/packer" 
-	}))
+	}))}
 
-	let-env NU_PACKER_UNIFIED = {
+	load-env {NU_PACKER_UNIFIED: {
 		downloader: {|url,dir,file,headers,timeout|
 			let headers = (
 				$headers  # {a: b}
@@ -69,9 +69,9 @@ export-env {
 				]
 			}) | compact | str join ' ')
 		}
-	}
+	}}
 
-	let-env config = (
+	load-env {config: (
 		# Broken ?
 		# `let-env TEST = 'FOO'` dosnt work afterwards
 		# this runs fine in interactive
@@ -84,7 +84,7 @@ export-env {
 				env_change: {}
 			}
 		}
-	)
+	)}
 }
 
 

@@ -102,9 +102,9 @@ if $regenerate_env {
 		(if ($PACKER_DIR | str starts-with '~') {
 			# if '~' is used we have to expand it
 			# ther reason why tilde is preferred is for portability
-			$"let-env NU_PACKER_HOME = \('($PACKER_DIR)' | path expand\)"
+			$"load-env {NU_PACKER_HOME: \('($PACKER_DIR)' | path expand\)}"
 		} else {
-			$"let-env NU_PACKER_HOME = '($PACKER_DIR)'"
+			$"load-env {NU_PACKER_HOME: '($PACKER_DIR)'}"
 		})
 
 		'# recovery command'
