@@ -164,6 +164,10 @@ def is_package_compatible [
 	nu_version
 	packer_version
 ] {
+	if ($package.meta | get -i version) == null {
+		print $"(ansi red)Invalid package: ($package.name) \(missing or broken meta.nuon).(ansi reset)"
+		return false
+	}
 	let min_nu_version = ($package.meta | get -i min_nu_version | default [0 0 0])
 	let max_nu_version = ($package.meta | get -i max_nu_version | default [9999 0 0])
 	let min_packer_version = ($package.meta | get -i min_packer_version | default [0 0 0])
