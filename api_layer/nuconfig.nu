@@ -1,6 +1,6 @@
 # append a pre_prompt hook to the hook-config
 export def-env 'hook append pre_prompt' [
-	block: block  # the code-block - example: {print 'foo'}
+	block  # (:closure/block) the code-block - example: {print 'foo'}
 ] {
 	load-env {config: ($env.config | upsert hooks.pre_prompt {|config|
 		$config | get -i hooks.pre_prompt | default [] | append $block
@@ -9,7 +9,7 @@ export def-env 'hook append pre_prompt' [
 
 # append a pre-execution hook to the config
 export def-env 'hook append pre_execution' [
-	block: block  # the code-block - example: {print 'foo'}
+	block  # (:closure/block) the code-block - example: {print 'foo'}
 ] {
 	load-env {config: ($env.config | upsert hooks.pre_execution {|config|
 		$config | get -i hooks.pre_execution | default [] | append $block
