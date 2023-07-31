@@ -218,7 +218,11 @@ export def compile [] {
 		| where condition == null
 		| par-each {|package|
 			$package
-			| insert meta {|| meta load $package}
+			| insert meta {||
+				let tmp = (meta load $package)
+				if ($tmp | describe | str starts-with "record") {$tmp
+				} else {null}
+			}
 		}
 		| filter {|package|
 			(
