@@ -155,7 +155,7 @@ def version_comparison [
 }
 
 def nu_escape_string [text: string] {
-	$text | str replace '[^a-zA-Z0-9]' '_'
+	$text | str replace -a '[^a-zA-Z0-9]' '_'
 }
 
 # check if a package is compatible with the current install
