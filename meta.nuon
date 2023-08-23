@@ -1,10 +1,10 @@
 {
-	version: [0 4 1]
+	version: [0 5 0]
 	description: 'packer.nu Package Manager'
 	copyright: '2022 Jan9103 (@jan9103:matrix.org)'
 	license: 'MIT'
 	url: 'https://github.com/Jan9103/packer.nu'
-	min_nu_version: [0 76 0]
-	max_nu_version: [0 83 0]
+	min_nu_version: [0 84 0]
+	max_nu_version: [0 84 0]
 }
 # vim: ft=nu
