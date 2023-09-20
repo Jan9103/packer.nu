@@ -36,7 +36,7 @@ packer install
 
 A [packer.nvim][] inspired package-manager for [NuShell][].
 
-Newest officially supported NuShell version: `0.84.x`
+Newest officially supported NuShell version: `0.85.x`
 
 | :information_source: Please ensure to update nushell **after** packer supports the new version |
 | :--- |
