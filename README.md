@@ -1,42 +1,8 @@
 # Packer.nu
 
----------------------------------
-
-## BREAKING UPDATE
-
-Nu0.84 completly changed how `str replace` works without any backward compatability.  
-The only sensible method to stay backward compatible would be to use `sed`, which would break windows, etc.
-
-Therefore packer0.5 is now a thing.
-
-Updating to packer0.5/nu0.84 (if something breaks along the way):
-```bash
-cd ~/.local/share/nushell/packer.nu/start/packer.nu
-git pull
-nu  # open a new (nested) nu instance
-packer update
-```
-
-If you stay on nu0.83 for now many package updates would most likely break things for you.  
-In case you accidentally updated i would upgrade nu (by copying the binary from github, using a different packagemanager for it, etc).  
-In case this isnt an option for you you will have to manually downgrade the packages:
-```nu
-cd ~/.local/share/nushell/packer.nu/start
-# go into each dir and downgrade until the minimum nu version is < 84
-ls | get name | each {|i| cd $i; while (open meta.nuon | get -i min_nu_version.1 | default 0) > 83 {git checkout @^}}
-```
-This might break the updater. If you want to upgrade after doing this run:
-```nu
-rm -rf ~/.local/share/nushell/packer.nu/start/*
-packer install
-# update nushell
-```
-
----------------------------------
-
 A [packer.nvim][] inspired package-manager for [NuShell][].
 
-Newest officially supported NuShell version: `0.85.x`
+Newest officially supported NuShell version: `0.86.x`
 
 | :information_source: Please ensure to update nushell **after** packer supports the new version |
 | :--- |
