@@ -1,5 +1,5 @@
 # append a pre_prompt hook to the hook-config
-export def-env 'hook append pre_prompt' [
+export def --env 'hook append pre_prompt' [
 	block  # (:closure/block) the code-block - example: {print 'foo'}
 ] {
 	load-env {config: ($env.config | upsert hooks.pre_prompt {|config|
@@ -8,7 +8,7 @@ export def-env 'hook append pre_prompt' [
 }
 
 # append a pre-execution hook to the config
-export def-env 'hook append pre_execution' [
+export def --env 'hook append pre_execution' [
 	block  # (:closure/block) the code-block - example: {print 'foo'}
 ] {
 	load-env {config: ($env.config | upsert hooks.pre_execution {|config|
@@ -25,7 +25,7 @@ export def-env 'hook append pre_execution' [
 #      condition: {|before, after| $after == /some/path/to/directory }
 #      code: {|before, after| load-env { SPAM: eggs } }
 #    }
-export def-env 'hook append env_change' [
+export def --env 'hook append env_change' [
 	variable_name: string
 	content
 ] {
