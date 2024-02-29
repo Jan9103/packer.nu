@@ -30,7 +30,7 @@ export-env {
 		editor: {|file,line|
 			let editor = ($env | get -i EDITOR)
 			let editor = (
-				if $editor in ['vi', 'vim', 'nvim', 'emacs', 'ne', 'micro', 'nano', 'code'] { 
+				if $editor in ['vi', 'vim', 'nvim', 'emacs', 'ne', 'micro', 'nano', 'code', 'kibi', 'amp', 'hx', 'helix'] { 
 					$editor
 				} else { 
 					if ($IS_WINDOWS) {
@@ -44,13 +44,7 @@ export-env {
 
 			let file = ($file | into string)
 
-			nu -c ((if ($editor == 'notepad') { # Notepad
-				print $"(ansi c)Waiting for Notepad to close...(ansi reset)" # Message to user
-				[
-					notepad # notepad has a very limited CLI and doesn't support line numbers
-					($file | to json)
-				]
-			} else if ($editor == 'code') { # VSCode or VSCodium
+			nu -c ((if ($editor == 'code') { # VSCode or VSCodium
 				print $"(ansi c)Waiting for Code to close the file...(ansi reset)" # Message to user
 				[
 					code
@@ -61,7 +55,20 @@ export-env {
 					})
 					--wait 
 				]
-			} else { # Default for most editors
+			# FILE:LINE
+			} else  if ($editor in ['hx', 'helix']) {
+				[
+					$editor
+					(if ($line == null) {$file} else {$'($file):($line)'} | to json)
+				]
+			# NO LINE SUPPORT
+			} else if ($editor in ['kibi', 'notepad']) {
+				[
+					$editor
+					($file | to json)
+				]
+			# FILE +LINE
+			} else {
 				[
 					$editor
 					(if ($line != null) {$"+($line)"})
