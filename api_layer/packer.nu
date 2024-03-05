@@ -326,14 +326,14 @@ def generate_init_file [
 					[(
 						$meta
 						| get -i modules | default []
-						| where not $it in $package.disabled_modules
+						| where not ($it in $package.disabled_modules)
 						| each {|module|
 							$'export use ($package.dir)/($module).nu *'
 						}
 					), (
 						$meta
 						| get -i prefixed_modules | default []
-						| where not $it in $package.disabled_modules
+						| where not ($it in $package.disabled_modules)
 						| each {|module|
 							$'export use ($package.dir)/($module).nu'
 						}
@@ -405,7 +405,7 @@ export def update [
 			$update_info = ($update_info | append 'Ran update script')
 		}
 		# show update info
-		if not $quiet and ($update_info | len) > 1 {
+		if not $quiet and ($update_info | length) > 1 {
 			print ($update_info | str join "\n")
 		}
 	}

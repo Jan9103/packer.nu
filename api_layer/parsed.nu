@@ -21,7 +21,7 @@ export def rg [
 		(if $hidden {'--hidden'})
 		(if $invert_match {'-v'})
 	] | compact)
-	^rg --vimgrep --no-config $options -- $regex $paths
+	^rg --vimgrep --no-config ...$options -- $regex ...$paths
 	| lines
 	| parse '{file}:{line}:{column}:{content}'
 	| each {|i|
