@@ -2,7 +2,7 @@
 
 A [packer.nvim][] inspired package-manager for [NuShell][].
 
-Newest officially supported NuShell version: `0.92.x`
+Newest officially supported NuShell version: `0.94.x`
 
 | :information_source: Please ensure to update nushell **after** packer supports the new version |
 | :--- |
@@ -50,7 +50,7 @@ You have to reopen nu afterwards.
 
 The INPW package adds a alternative usage based on package-repositories and commands (similar to apt, pacman, etc)
 
-The usage and setup is explained on its [GitHub][inpw GitHub] and [CodeBerg](inpw CodeBerg) page.
+The usage and setup is explained on its [GitHub][inpw GitHub] and [CodeBerg][inpw CodeBerg] page.
 
 ### Selecting and Configuring packages
 
