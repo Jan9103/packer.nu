@@ -1,0 +1,10 @@
+{
+  "name": "packer.nu",
+  "shell_config": {
+    "source_env": "api_layer/packer_stdlib.nu",
+    "use_all": "api_layer/packer_stdlib.nu"
+  },
+  "nu_libs": {
+    "packer_nu_api": "api_layer"
+  }
+}

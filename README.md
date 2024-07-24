@@ -118,16 +118,21 @@ enough.
 
 
 ## Links
+
 - Source Code: [CodeBerg][packer.nu CodeBerg], [GitHub][packer.nu GitHub]
 - The Wiki / Documentation: [CodeBerg][wiki CodeBerg], [GitHub][wiki GitHub]
 - Matrix channel: [#packer.nu:matrix.org](https://matrix.to/#/#packer.nu:matrix.org)
 - [NuShell][]
-- [NuPac][] (another nushell package manager)
+- ~~[NuPac][] (another nushell package manager)~~
+- [nupm][] (nushell package manager made by the nushell dev-team)
+- [numng][] (successor to packer.nu)
 
 
 [packer.nvim]: https://github.com/wbthomason/packer.nvim
 [NuShell]: https://github.com/nushell/nushell
 [NuPac]: https://github.com/skelly37/nupac
+[nupm]: https://github.com/nushell/nupm
+[numng]: https://github.com/jan9103/numng
 
 [packer.nu GitHub]: https://github.com/jan9103/packer.nu
 [packer.nu CodeBerg]: https://codeberg.org/packer.nu/packer.nu
