@@ -2,7 +2,7 @@
 
 A [packer.nvim][] inspired package-manager for [NuShell][].
 
-Newest officially supported NuShell version: `0.96.x`
+Newest officially supported NuShell version: `0.97.x`
 
 | :information_source: Please ensure to update nushell **after** packer supports the new version |
 | :--- |
