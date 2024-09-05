@@ -1,4 +1,37 @@
-# Packer.nu
+# Deprecation notice
+
+## What does deprecated mean here?
+
+I will for the forseeable future keep this compatible with new nu versions, but
+* i wont add new features / packages.
+* when a alternative has properly matured i will archive this.
+* im no longer using it myself and therefore might not notice new bugs.
+
+
+## What now?
+
+Suggestion:
+
+* New users: use a active alternative.  
+* Old users: if packer does everything you need keep using it until it breaks or something else matures.  
+* Package devs: use the [nupm][] format.
+
+
+## Alternatives
+
+| Name        | Status         | nu versions     | Author       | Package format(s) | Written in  |
+| ----------- | -------------- | --------------- | ------------ | ----------------- | ----------- |
+| `packer.nu` | `deprecated`   | latest + recent | jan9103      | `packer.nu`       | `nu`-script |
+| [nupm][]    | `experimental` | nightly         | nushell-team | `nupm`            | `nu`-script |
+| [numng][]   | `experimental` | latest + recent | jan9103      | `numng`, `packer.nu` (partial), `nupm` (partial) | `python` |
+| [nuun][]    | `test bed` / `abandoned` | ?     | kubouch      | `nuun`            | `nu`-script |
+| [NuPac][]   | `archived`     | `0.73.0`        | skelly37     | `nupac`           | `nu`-script |
+
+
+---
+
+
+# Packer.nu (Main README)
 
 A [packer.nvim][] inspired package-manager for [NuShell][].
 
@@ -7,31 +40,6 @@ Newest officially supported NuShell version: `0.97.x`
 | :information_source: Please ensure to update nushell **after** packer supports the new version |
 | :--- |
 
-
-## Why? What? How?
-
-Most nushell configs without a package-manager:
-- complicated and confusing
-  - everything in a few files or sourced in weird ways
-- half commented out
-  - broken over time
-  - currently not needed
-- half outdated (the author updated a snippet, but no one noticed)
-- missing features (to lazy to search for a working foo tab completion)
-
-The solution: copy a method, which works: the vim package management system.  
-Or to be more precise: the (at the project start) biggest system: [packer.nvim][].
-
-### Which packages exist?
-
-A few examples:
-- Tab completion for makefiles, shh, neovim, etc
-- Parsers for command outputs, such as pylint and docker
-- Prompts, such as starship
-- Quick navigation utilities
-- Python virtual environments
-- Auto attaching TMUX sessions
-- Background threads with pueue
 
 ## Installation
 
@@ -45,12 +53,6 @@ You have to reopen nu afterwards.
 
 ## Basic Usage
 
-
-### INPW
-
-The INPW package adds a alternative usage based on package-repositories and commands (similar to apt, pacman, etc)
-
-The usage and setup is explained on its [GitHub][inpw GitHub] and [CodeBerg][inpw CodeBerg] page.
 
 ### Selecting and Configuring packages
 
@@ -81,47 +83,10 @@ To install new packages run `packer install`.
 To update installed packages run `packer update`.
 
 
-## Goals:
-
-
-### Packer
-
-- familiar [packer.nvim][] like usage
-- expandable (via packages)
-- maintainability between nu versions
-- support for the latest version (as well as the version before)
-
-
-### Package format
-
-- easy to pick up and write new packages
-- easy to write a (new) package-manager for
-- easy to maintain
-- version independent
-
-## FAQ
-
-**[Insert Operating System] has a issue?**  
-Since i exclusively use linux (and android) can't properly maintain support myself.  
-If you are up for it (or just a one time fix) feel free to open a MergeRequest.
-
-**I need help with something, but don't want to open a git issue.**  
-There is a Matrix channel: [#packer.nu:matrix.org](https://matrix.to/#/#packer.nu:matrix.org)
-
-**Is it "production" ready?**  
-i have been [dogfooding](https://en.wikipedia.org/wiki/Eating_your_own_dog_food) it for
-quite some time now and only ever had issues during development and installation
-(which should now work better with v0.4).  
-Since nushell will be usable (without packages) even if packer is completely broken
-and nushell itself isn't quite stable/feature complete i would argue call it stable
-enough.
-
-
 ## Links
 
 - Source Code: [CodeBerg][packer.nu CodeBerg], [GitHub][packer.nu GitHub]
 - The Wiki / Documentation: [CodeBerg][wiki CodeBerg], [GitHub][wiki GitHub]
-- Matrix channel: [#packer.nu:matrix.org](https://matrix.to/#/#packer.nu:matrix.org)
 - [NuShell][]
 - ~~[NuPac][] (another nushell package manager)~~
 - [nupm][] (nushell package manager made by the nushell dev-team)
@@ -133,6 +98,7 @@ enough.
 [NuPac]: https://github.com/skelly37/nupac
 [nupm]: https://github.com/nushell/nupm
 [numng]: https://github.com/jan9103/numng
+[nuun]: https://github.com/kubouch/nuun
 
 [packer.nu GitHub]: https://github.com/jan9103/packer.nu
 [packer.nu CodeBerg]: https://codeberg.org/packer.nu/packer.nu
