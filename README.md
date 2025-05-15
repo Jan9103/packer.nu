@@ -2,10 +2,10 @@
 
 ## What does deprecated mean here?
 
-I will for the forseeable future keep this compatible with new nu versions, but
+I will for the foreseeable future keep this compatible with new nu versions, but
 * i wont add new features / packages.
 * when a alternative has properly matured i will archive this.
-* im no longer using it myself and therefore might not notice new bugs.
+* I'm no longer using it myself and therefore might not notice new bugs.
 
 
 ## What now?
@@ -16,16 +16,7 @@ Suggestion:
 * Old users: if packer does everything you need keep using it until it breaks or something else matures.  
 * Package devs: use the [nupm][] format.
 
-
-## Alternatives
-
-| Name        | Status         | nu versions     | Author       | Package format(s) | Written in  |
-| ----------- | -------------- | --------------- | ------------ | ----------------- | ----------- |
-| `packer.nu` | `deprecated`   | latest + recent | jan9103      | `packer.nu`       | `nu`-script |
-| [nupm][]    | `experimental` | nightly         | nushell-team | `nupm`            | `nu`-script |
-| [numng][]   | `experimental` | latest + recent | jan9103      | `numng`, `packer.nu` (partial), `nupm` (partial) | `python` |
-| [nuun][]    | `test bed` / `abandoned` | ?     | kubouch      | `nuun`            | `nu`-script |
-| [NuPac][]   | `archived`     | `0.73.0`        | skelly37     | `nupac`           | `nu`-script |
+A overview can be found [here](https://jan9103.github.io/nushell/faq/package_management.html).
 
 
 ---
