@@ -13,7 +13,7 @@ export def rg [
 	--hidden  # include hidden files and directories
 	--invert-match(-v)
 	regex: string
-	paths: path:list = []
+	paths: list<path> = []
 ] {
 	let options = ([
 		(if $ignore_case {'-i'})
