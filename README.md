@@ -26,7 +26,7 @@ A overview can be found [here](https://jan9103.github.io/nushell/faq/package_man
 
 A [packer.nvim][] inspired package-manager for [NuShell][].
 
-Newest officially supported NuShell version: `0.104.x`
+Newest officially supported NuShell version: `0.105.x`
 
 | :information_source: Please ensure to update nushell **after** packer supports the new version |
 | :--- |
