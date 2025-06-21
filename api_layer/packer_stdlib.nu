@@ -14,11 +14,11 @@ export-env {
 				| flatten  # [a b]
 			)
 			let v = ((nu --version | split row '.').1 | into int)
-			http get -r -H $headers -m $timeout $url
-			| save -r $'($dir)/($file)'
+			http get --raw --headers $headers --max-time $timeout $url
+			| save --raw $'($dir)/($file)'
 		}
 		editor: {|file,line|
-			let editor = ($env | get -i EDITOR)
+			let editor = $env.EDITOR?
 			let editor = (
 				if $editor in ['vi', 'vim', 'nvim', 'emacs', 'ne', 'micro', 'nano', 'code', 'kibi', 'amp', 'hx', 'helix'] { 
 					$editor
@@ -34,7 +34,7 @@ export-env {
 
 			let file = ($file | into string)
 
-			nu -c ((if ($editor == 'code') { # VSCode or VSCodium
+			nu --commands ((if ($editor == 'code') { # VSCode or VSCodium
 				print $"(ansi c)Waiting for Code to close the file...(ansi reset)" # Message to user
 				[
 					code

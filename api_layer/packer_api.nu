@@ -1,6 +1,6 @@
 export-env {
 	let IS_WINDOWS = ($nu.os-info.family == 'windows')
-	load-env {NU_PACKER_HOME: ($env | get -i NU_PACKER_HOME | default (if ($IS_WINDOWS) { 
+	load-env {NU_PACKER_HOME: ($env.NU_PACKER_HOME? | default (if ($IS_WINDOWS) { 
 		$'($env.LOCALAPPDATA)/nushell/packer' 
 	} else {
 		$"($env.HOME)/.local/share/nushell/packer" 

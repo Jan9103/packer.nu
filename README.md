@@ -14,9 +14,9 @@ Suggestion:
 
 * New users: use a active alternative.  
 * Old users: if packer does everything you need keep using it until it breaks or something else matures.  
-* Package devs: use the [nupm][] format.
+* Package devs: use the [nupm][] format (all of the most promising projects support it).
 
-A overview can be found [here](https://jan9103.github.io/nushell/faq/package_management.html).
+A alternative overview can be found [here](https://jan9103.github.io/nushell/faq/package_management.html).
 
 
 ---
@@ -26,7 +26,8 @@ A overview can be found [here](https://jan9103.github.io/nushell/faq/package_man
 
 A [packer.nvim][] inspired package-manager for [NuShell][].
 
-Newest officially supported NuShell version: `0.105.x`
+Newest officially supported NuShell version: `0.105.x`  
+Should work with NuShell version: `>= 0.88.x`
 
 | :information_source: Please ensure to update nushell **after** packer supports the new version |
 | :--- |
@@ -79,9 +80,6 @@ To update installed packages run `packer update`.
 - Source Code: [CodeBerg][packer.nu CodeBerg], [GitHub][packer.nu GitHub]
 - The Wiki / Documentation: [CodeBerg][wiki CodeBerg], [GitHub][wiki GitHub]
 - [NuShell][]
-- ~~[NuPac][] (another nushell package manager)~~
-- [nupm][] (nushell package manager made by the nushell dev-team)
-- [numng][] (successor to packer.nu)
 
 
 [packer.nvim]: https://github.com/wbthomason/packer.nvim

@@ -3,7 +3,7 @@ export def --env 'hook append pre_prompt' [
 	block  # (:closure/block) the code-block - example: {print 'foo'}
 ] {
 	load-env {config: ($env.config | upsert hooks.pre_prompt {|config|
-		$config | get -i hooks.pre_prompt | default [] | append $block
+		$config.hooks?.pre_prompt? | default [] | append $block
 	})}
 }
 
@@ -12,7 +12,7 @@ export def --env 'hook append pre_execution' [
 	block  # (:closure/block) the code-block - example: {print 'foo'}
 ] {
 	load-env {config: ($env.config | upsert hooks.pre_execution {|config|
-		$config | get -i hooks.pre_execution | default [] | append $block
+		$config.hooks?.pre_execution? | default [] | append $block
 	})}
 }
 
@@ -30,12 +30,10 @@ export def --env 'hook append env_change' [
 	content
 ] {
 	load-env {config: ($env.config | upsert hooks.env_change {|config|
-		(
-			$config
-			| get -i hooks.env_change | default {}
-			| upsert $variable_name {|envc|
-				$envc | get -i $variable_name | default [] | append $content
-			}
-		)
+		$config.hooks?.env_change?
+		| default {}
+		| upsert $variable_name {|envc|
+			$envc | get --ignore-errors $variable_name | default [] | append $content
+		}
 	})}
 }

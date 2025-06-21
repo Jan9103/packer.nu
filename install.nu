@@ -37,7 +37,7 @@ let ABS_PACKER_DIR = ($PACKER_DIR | path expand)
 let ABS_PACKER_PACKAGE_DIR = ($PACKER_PACKAGE_DIR | path expand)
 print $'($RESET_LINE)(ansi g)Install env is set up'
 
-# append some lines to a file
+# append some lines to a file (i think this script might be older than "open -a" :D )
 def 'append_to_file' [
 	file: path
 	lines: list
@@ -46,18 +46,18 @@ def 'append_to_file' [
 	| lines
 	| append $lines
 	| str join (char nl)
-	| save -f $file
+	| save --force $file
 }
 
 
-print -n $'(ansi y)Creating directories..'
+print --no-newline $'(ansi y)Creating directories..'
 for subdir in ['start', 'bin', 'lib'] {
 	mkdir $'($ABS_PACKER_DIR)/($subdir)'
 }
 print $'($RESET_LINE)(ansi g)Created directories.'
 
 if not ($'($NU_CONFIG_DIR)/packages.nuon' | path exists) {
-	print -n $'(ansi y)Creating defaut packages.nuon..'
+	print --no-newline $'(ansi y)Creating defaut packages.nuon..'
 	$"{\n\tpackages: [\n\t\t{source: '($PACKER_REPO)'}\n\t]\n}\n# vim: ft=nu"
 	[
 		'{'
@@ -95,7 +95,7 @@ let enable_conditional_loading = (
 )
 
 if $regenerate_env {
-	print -n $'(ansi y)Adding packer load section to ($nu.env-path).'
+	print --no-newline $'(ansi y)Adding packer load section to ($nu.env-path).'
 	append_to_file $nu.env-path ([
 		''
 		'### packer.nu ###'
@@ -113,18 +113,18 @@ if $regenerate_env {
 		'# bootstrap packer.nu'
 		"if not ($'($env.NU_PACKER_HOME)/start/packer.nu/api_layer/packer_api.nu' | path exists) {"
 		"  print $'(ansi ub)Bootstrapping packer.nu...(ansi reset)'"
-		'  nu -c (http get https://raw.githubusercontent.com/jan9103/packer.nu/main/install.nu)'
+		'  nu --commands (http get https://raw.githubusercontent.com/jan9103/packer.nu/main/install.nu)'
 		"  print $'(ansi ub)Bootstrapped packer.nu.'"
 		"  print $'(ansi ub)Installing packages...(ansi reset)'"
-		"  nu -c $'use ($env.NU_PACKER_HOME)/start/packer.nu/api_layer/packer.nu; packer install'"
+		"  nu --commands $'use ($env.NU_PACKER_HOME)/start/packer.nu/api_layer/packer.nu; packer install'"
 		"  print $'(ansi ub)Installed packages.(ansi reset)'"
 		'}'
 		'# compile conditional package loader'
 		"# conditional packages have to be generated in the env, since you can't generate and import in the same file."
 		(if $enable_conditional_loading == 'y' {
-			$"nu -c 'use ($PACKER_DIR)/start/packer.nu/api_layer/packer.nu; packer compile_cond_init ($PACKER_DIR)/conditional_packages.nu'"
+			$"nu --commands 'use ($PACKER_DIR)/start/packer.nu/api_layer/packer.nu; packer compile_cond_init ($PACKER_DIR)/conditional_packages.nu'"
 		} else {
-			$"#nu -c 'use ($PACKER_DIR)/start/packer.nu/api_layer/packer.nu; packer compile_cond_init ($PACKER_DIR)/conditional_packages.nu'"
+			$"#nu --commands 'use ($PACKER_DIR)/start/packer.nu/api_layer/packer.nu; packer compile_cond_init ($PACKER_DIR)/conditional_packages.nu'"
 		})
 
 		"if not ($'($env.NU_PACKER_HOME)/packer_packages.nu' | path exists) { 'export-env {}' | save $'($env.NU_PACKER_HOME)/packer_packages.nu' }"

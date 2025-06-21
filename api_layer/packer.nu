@@ -2,13 +2,13 @@
 def 'gitutil default branch' [ directory: path ] {
 	open $"($directory)/.git/refs/remotes/origin/HEAD" | str trim
 	| parse 'ref: refs/remotes/origin/{branch}'
-	| get -i branch.0  # if detached return null
+	| get branch?.0?  # if detached return null
 }
 
 def 'gitutil current branch' [ directory: path ] {
 	open $"($directory)/.git/HEAD" | str trim
 	| parse 'ref: refs/heads/{branch}'
-	| get -i branch.0  # if detached return null
+	| get branch?.0?  # if detached return null
 }
 
 def 'gitutil auto checkout' [
@@ -68,7 +68,7 @@ export def 'config parse package' [
 	default_git_repo_prefix: string = 'packer.nu'  # the default git-host url user/organisation prefix
 ] {
 	let name = (
-		$package | get -i as
+		$package.as?
 		| default ($package.source | path basename)
 	)
 	{
@@ -83,33 +83,32 @@ export def 'config parse package' [
 				}
 			}
 		)
-		deactivate: ($package | get -i deactivate | default false)
-		freeze: ($package | get -i freeze | default false)
-		opt: ($package | get -i opt | default false)
+		deactivate: ($package.deactivate? | default false)
+		freeze: ($package.freeze? | default false)
+		opt: ($package.opt? | default false)
 		name: $name
 		dir: (
-			if ($package | get -i opt | default false) {
+			if ($package.opt? | default false) {
 				$'($env.NU_PACKER_HOME)/opt/($name)'
 			} else { 
 				$'($env.NU_PACKER_HOME)/start/($name)'
 			}
 		)
-		config: ($package | get -i config)
-		condition: ($package | get -i condition)
-		branch: ($package | get -i branch)
-		commit: ($package | get -i commit)
-		tag: ($package | get -i tag)
-		disabled_modules: ($package | get -i disabled_modules | default [])
+		config: $package.config?
+		condition: $package.condition?
+		branch: $package.branch?
+		commit: $package.commit?
+		tag: $package.tag?
+		disabled_modules: ($package.disabled_modules? | default [])
 	}
 }
 
 # API-INTERFACE: Get packages defined in packages.nuon
 export def 'config get packages' [] {
 	let config = (config load)
-	let default_git_host = ($config | get -i default_git_host | default 'https://github.com')
-	let default_git_repo_prefix = ($config | get -i default_git_repo_prefix | default 'packer.nu')
-	$config
-	| get -i packages | default []
+	let default_git_host = ($config.default_git_host? | default 'https://github.com')
+	let default_git_repo_prefix = ($config.default_git_repo_prefix? | default 'packer.nu')
+	$config.packages? | default []
 	| par-each {|package| config parse package $package $default_git_host $default_git_repo_prefix}
 }
 
@@ -121,7 +120,7 @@ def 'meta load' [
 		let git_commit = (
 			if ($'($package.dir)/.git' | path exists) {
 				PWD=$package.dir ^git log --oneline --no-abbrev-commit
-				| lines | get -i 0 | default 'NaN'
+				| lines | get 0? | default 'NaN'
 			} else {'NaN'}
 		)
 		open $file
@@ -138,12 +137,12 @@ def nu_version [] {
 
 def packer_version [] {
 	open $'($env.NU_PACKER_HOME)/start/packer.nu/meta.nuon'
-	| get -i version | default [0 0 0]
+	| get version? | default [0 0 0]
 }
 
 def version_comparison [
-	version_a #: list<int> # [mayor minor patch]
-	version_b #: list<int> # [mayor minor patch]
+	version_a #: list<int> # [major minor patch]
+	version_b #: list<int> # [major minor patch]
 ] {
 	if $version_a.0 > $version_b.0 {'>'
 	} else if $version_a.0 < $version_b.0 {'<'
@@ -155,7 +154,7 @@ def version_comparison [
 }
 
 def nu_escape_string [text: string] {
-	$text | str replace -a --regex '[^a-zA-Z0-9]' '_'
+	$text | str replace --all --regex '[^a-zA-Z0-9]' '_'
 }
 
 # check if a package is compatible with the current install
@@ -164,14 +163,14 @@ def is_package_compatible [
 	nu_version
 	packer_version
 ] {
-	if ($package.meta | get -i version) == null {
+	if $package.meta.version? == null {
 		print $"(ansi red)Invalid package: ($package.name) \(missing or broken meta.nuon).(ansi reset)"
 		return false
 	}
-	let min_nu_version = ($package.meta | get -i min_nu_version | default [0 0 0])
-	let max_nu_version = ($package.meta | get -i max_nu_version | default [9999 0 0])
-	let min_packer_version = ($package.meta | get -i min_packer_version | default [0 0 0])
-	let max_packer_version = ($package.meta | get -i max_packer_version | default [9999 0 0])
+	let min_nu_version = ($package.meta.min_nu_version? | default [0 0 0])
+	let max_nu_version = ($package.meta.max_nu_version? | default [9999 0 0])
+	let min_packer_version = ($package.meta.min_packer_version? | default [0 0 0])
+	let max_packer_version = ($package.meta.max_packer_version? | default [9999 0 0])
 
 	let result = ([
 		($package.dir | path exists)  # filter not installed ones
@@ -210,7 +209,7 @@ export def compile [] {
 	print 'Compiling init-system'  #' # <- fix TS syntax hightlight
 	let nu_version = (nu_version)
 	let packer_version = (packer_version)
-	let ignore_compatibility = (config load | get -i ignore_compatibility | default false)
+	let ignore_compatibility = (config load | get ignore_compatibility? | default false)
 	let packages = (
 		config get packages
 		| where not opt
@@ -224,12 +223,10 @@ export def compile [] {
 				} else {null}
 			}
 		}
-		| filter {|package|
-			(
-				$ignore_compatibility
-				or (is_package_compatible $package $nu_version $packer_version)
-			)
-		}
+		| where (
+			$ignore_compatibility
+			or (is_package_compatible $it $nu_version $packer_version)
+		)
 	)
 	generate_init_file $packages $'($env.NU_PACKER_HOME)/packer_packages.nu'
 }
@@ -239,7 +236,7 @@ export def compile [] {
 export def compile_cond_init [file: path] {
 	let nu_version = (nu_version)
 	let packer_version = (packer_version)
-	let ignore_compatibility = (config load | get -i ignore_compatibility | default false)
+	let ignore_compatibility = (config load | get ignore_compatibility? | default false)
 	let packages = (
 		config get packages
 		| where not opt
@@ -252,10 +249,10 @@ export def compile_cond_init [file: path] {
 				or (is_package_compatible $package $nu_version $packer_version)
 			) and (
 				$package.condition
-				| get -i env | default {}
+				| get --ignore-errors env | default {}
 				| transpose k v
-				| each {|i| ($env | get -i $i.k) in $i.v}
-				| all {|i| $i}
+				| each {|i| ($env | get --ignore-errors $i.k) in $i.v}
+				| all {}
 			)
 		)}
 	)
@@ -276,7 +273,7 @@ def generate_init_file [
 		} | compact
 		| str join ' '
 	)
-	let package_configs = (nu -c (
+	let package_configs = (nu --commands (
 		$packages
 		| par-each {|i|
 			if $i.config != null {
@@ -293,7 +290,7 @@ def generate_init_file [
 		# TODO: @deprecated
 		'export-env {' #'
 		"  load-env {"
-		$"    NU_LIB_DIRS: \($env | get -i NU_LIB_DIRS | default [] | append [($lib_dirs)]\)"
+		$"    NU_LIB_DIRS: \($env.NU_LIB_DIRS? | default [] | append [($lib_dirs)]\)"
 		$'    NU_PACKER_CFG: ($package_configs)'
 		'  }'
 		(
@@ -324,15 +321,13 @@ def generate_init_file [
 				if ($meta_file | path exists) {
 					let meta = (open $meta_file)
 					[(
-						$meta
-						| get -i modules | default []
+						$meta.modules? | default []
 						| where not ($it in $package.disabled_modules)
 						| each {|module|
 							$'export use ($package.dir)/($module).nu *'
 						}
 					), (
-						$meta
-						| get -i prefixed_modules | default []
+						$meta.prefixed_modules? | default []
 						| where not ($it in $package.disabled_modules)
 						| each {|module|
 							$'export use ($package.dir)/($module).nu'
@@ -343,7 +338,7 @@ def generate_init_file [
 		)
 	] | flatten
 	| str join (char nl)
-	| save -f $init_file
+	| save --force $init_file
 }
 
 # install the packages newly added to the packages.nuon
@@ -359,7 +354,7 @@ export def install [
 				if ($package.source | path exists) {	
 					symlink $package.source $package.dir
 				} else {
-					print -e $"(ansi r)Failed to link (ansi rb)($package.source)(ansi r) due to the folder being absent(ansi reset)"
+					print --stderr $"(ansi r)Failed to link (ansi rb)($package.source)(ansi r) due to the folder being absent(ansi reset)"
 				}
 			} else {
 				if not $quiet { print '-> Downloading' }
@@ -382,7 +377,7 @@ export def update [
 	# local repos are symlinks -> not updated
 	# manually added dirs dont have '.git/' -> not updated
 	if not $quiet { print 'Updating packages…' }
-	let header_color = ($env | get -i config.color_config.header | default green_bold)
+	let header_color = ($env.config?.color_config?.header? | default green_bold)
 	config get packages
 	| where freeze == false
 	| par-each {|package|
@@ -418,28 +413,28 @@ export def debuginfo [
 	let packages = (config get packages)
 	let packer_meta = (meta load (
 		$packages
-		| where name == 'packer.nu' | get -i 0 | default {}
+		| where name == 'packer.nu' | get 0? | default {}
 	))
 	print $'Nu version: (nu --version | str trim)'
 	print $'OS: ($nu.os-info.name)'
-	print $'Packer version: ($packer_meta | get -i version | default "?")'
+	print $'Packer version: ($packer_meta.version? | default "?")'
 	print ''
 
 	if $package_name != '' {
 		let package = (
 			config get packages
 			| where source =~ $package_name
-			| get -i 0
+			| get 0?
 		)
 		if $package == null {
-			print -e $'Unable to find package "($package_name)"'
+			print --stderr $'Unable to find package "($package_name)"'
 		} else {
 			print $package_name
 			print $'($package)'
 			let meta = (meta load $package)
 			if $meta != null {
-				print $'version: ($meta | get -i version | default "?")'
-				print $'git-commit: ($meta | get -i current_git_commit)'
+				print $'version: ($meta.version? | default "?")'
+				print $'git-commit: ($meta.current_git_commit?)'
 			}
 		}
 	}
@@ -466,29 +461,11 @@ export def status [] {
 export def clean [] {
 	let used = (config get packages).name
 
-	for name in (ls -s $'($env.NU_PACKER_HOME)/start').name {
+	for name in (ls --short-names $'($env.NU_PACKER_HOME)/start').name {
 		if not $name in $used {
 			print $'"($name)" is unused.'
-			rm -rpI $'($env.NU_PACKER_HOME)/start/($name)'
+			rm --recursive --permanent --interactive-once $'($env.NU_PACKER_HOME)/start/($name)'
 		}
 	}
 	return
 }
-
-# manual pages
-# export def man [
-# 	page: string
-# ] {
-# 	let dirs = (
-# 		config get packages
-# 		| each {|i| $'($i)/doc'}
-# 		| where ($it | path exists)
-# 	)
-# 	let results = (
-# 		$dirs
-# 		| par-each {|dir|
-# 			ls $dir
-# 			| where ($it.name | path basename) == $'($page).md'
-# 		}
-# 	)
-# }
