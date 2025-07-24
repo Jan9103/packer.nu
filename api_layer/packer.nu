@@ -2,13 +2,13 @@
 def 'gitutil default branch' [ directory: path ] {
 	open $"($directory)/.git/refs/remotes/origin/HEAD" | str trim
 	| parse 'ref: refs/remotes/origin/{branch}'
-	| get branch?.0?  # if detached return null
+	| $in.branch?.0?  # if detached return null
 }
 
 def 'gitutil current branch' [ directory: path ] {
 	open $"($directory)/.git/HEAD" | str trim
 	| parse 'ref: refs/heads/{branch}'
-	| get branch?.0?  # if detached return null
+	| $in.branch?.0?  # if detached return null
 }
 
 def 'gitutil auto checkout' [
@@ -120,7 +120,7 @@ def 'meta load' [
 		let git_commit = (
 			if ($'($package.dir)/.git' | path exists) {
 				PWD=$package.dir ^git log --oneline --no-abbrev-commit
-				| lines | get 0? | default 'NaN'
+				| lines | $in.0? | default 'NaN'
 			} else {'NaN'}
 		)
 		open $file
@@ -137,7 +137,7 @@ def nu_version [] {
 
 def packer_version [] {
 	open $'($env.NU_PACKER_HOME)/start/packer.nu/meta.nuon'
-	| get version? | default [0 0 0]
+	| $in.version? | default [0 0 0]
 }
 
 def version_comparison [
@@ -209,7 +209,7 @@ export def compile [] {
 	print 'Compiling init-system'  #' # <- fix TS syntax hightlight
 	let nu_version = (nu_version)
 	let packer_version = (packer_version)
-	let ignore_compatibility = (config load | get ignore_compatibility? | default false)
+	let ignore_compatibility = (config load | $in.ignore_compatibility? | default false)
 	let packages = (
 		config get packages
 		| where not opt
@@ -236,7 +236,7 @@ export def compile [] {
 export def compile_cond_init [file: path] {
 	let nu_version = (nu_version)
 	let packer_version = (packer_version)
-	let ignore_compatibility = (config load | get ignore_compatibility? | default false)
+	let ignore_compatibility = (config load | $in.ignore_compatibility? | default false)
 	let packages = (
 		config get packages
 		| where not opt
@@ -249,9 +249,11 @@ export def compile_cond_init [file: path] {
 				or (is_package_compatible $package $nu_version $packer_version)
 			) and (
 				$package.condition
-				| get --ignore-errors env | default {}
+				| $in.env? | default {}
 				| transpose k v
-				| each {|i| ($env | get --ignore-errors $i.k) in $i.v}
+				| each {|i| (
+					($env | transpose k v | where $it.k == $i.k).0?.v?
+				) in $i.v}
 				| all {}
 			)
 		)}
@@ -413,7 +415,7 @@ export def debuginfo [
 	let packages = (config get packages)
 	let packer_meta = (meta load (
 		$packages
-		| where name == 'packer.nu' | get 0? | default {}
+		| where name == 'packer.nu' | $in.0? | default {}
 	))
 	print $'Nu version: (nu --version | str trim)'
 	print $'OS: ($nu.os-info.name)'
@@ -424,7 +426,7 @@ export def debuginfo [
 		let package = (
 			config get packages
 			| where source =~ $package_name
-			| get 0?
+			| $in.0?
 		)
 		if $package == null {
 			print --stderr $'Unable to find package "($package_name)"'

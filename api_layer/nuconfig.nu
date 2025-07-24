@@ -33,7 +33,7 @@ export def --env 'hook append env_change' [
 		$config.hooks?.env_change?
 		| default {}
 		| upsert $variable_name {|envc|
-			$envc | get --ignore-errors $variable_name | default [] | append $content
+			($envc | transpose k v | where $it.k == $variable_name | append {v: []}).0.v | append $content
 		}
 	})}
 }
