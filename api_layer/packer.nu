@@ -444,13 +444,19 @@ export def debuginfo [
 
 # get the status of packer.nu
 export def status [] {
-	if 'packer_api' in (overlay list) {
+	if 'packer_api' in (
+		overlay list
+		| if ($in | describe) =~ '^table' { where $it.active == true | get name } else { $in }  # https://www.nushell.sh/blog/2025-09-02-nushell_0_107_0.html#add-active-column-to-overlay-list-16125-toc
+	) {
 		print $'(ansi c)API-Layer: (ansi g)loaded'
 	} else {
 		print $'(ansi c)API-Layer: (ansi rb)not loaded'
 		print $'  (ansi c)reload: (ansi ligr)overlay use ($env.NU_PACKER_HOME)/start/packer.nu/api_layer/packer_api.nu'
 	}
-	if 'packer_packages' in (overlay list) {
+	if 'packer_packages' in (
+		overlay list
+		| if ($in | describe) =~ '^table' { where $it.active == true | get name } else { $in }  # https://www.nushell.sh/blog/2025-09-02-nushell_0_107_0.html#add-active-column-to-overlay-list-16125-toc
+	) {
 		print $'(ansi c)Packages: (ansi g)loaded'
 	} else {
 		print $'(ansi c)Packages: (ansi rb)not loaded'
