@@ -1,12 +1,16 @@
 # get the origin head (default) branch name
 def 'gitutil default branch' [ directory: path ] {
-	open $"($directory)/.git/refs/remotes/origin/HEAD" | str trim
+	open --raw $"($directory)/.git/refs/remotes/origin/HEAD"
+	| decode 'utf-8'
+	| str trim
 	| parse 'ref: refs/remotes/origin/{branch}'
 	| $in.branch?.0?  # if detached return null
 }
 
 def 'gitutil current branch' [ directory: path ] {
-	open $"($directory)/.git/HEAD" | str trim
+	open --raw $"($directory)/.git/HEAD"
+	| decode 'utf-8'
+	| str trim
 	| parse 'ref: refs/heads/{branch}'
 	| $in.branch?.0?  # if detached return null
 }
@@ -20,11 +24,13 @@ def 'gitutil auto checkout' [
 		if $package.tag != null {
 			# always update in case it changed
 			^git fetch -q origin $"+refs/tags/($package.tag):refs/tags/($package.tag)"
-			open ".git/refs/tags/($package.tag)" | str trim
+			open --raw ".git/refs/tags/($package.tag)"
+			| decode 'utf-8'
+			| str trim
 		} else { $package.commit }
 	)
 	if $target_commit != null {
-		if (open ".git/HEAD" | str trim) != $target_commit {
+		if (open --raw ".git/HEAD" | decode 'utf-8' | str trim) != $target_commit {
 			^git fetch -q origin $target_commit
 			^git checkout -q $target_commit
 			if not $quiet {
@@ -39,7 +45,7 @@ def 'gitutil auto checkout' [
 			} else { $package.branch }
 		)
 		if $target_branch != $current_branch {
-			if not ($'.git/refs/heads/($target_branch)' | path exists) {
+			if not ($'./.git/refs/heads/($target_branch)' | path exists) {
 				^git fetch -q origin $target_branch
 				^git branch -q $target_branch FETCH_HEAD
 			}
@@ -52,7 +58,9 @@ def 'gitutil auto checkout' [
 }
 
 def 'config load' [] {
-	open $'($nu.history-path | path dirname)/packages.nuon'
+	open --raw $'($nu.history-path | path dirname)/packages.nuon'
+	| decode 'utf-8'
+	| from nuon
 }
 
 # API-INTERFACE: Parse a package dnfinition from packages.nuon
@@ -123,33 +131,43 @@ def 'meta load' [
 				| lines | $in.0? | default 'NaN'
 			} else {'NaN'}
 		)
-		open $file
+		open --raw $file
+		| decode 'utf-8'
+		| from nuon
 		| upsert current_git_commit $git_commit
 	}
 }
 
 def nu_version [] {
-	nu --version
+	^$nu.current-exe --version
+	| decode 'utf-8'
 	| str trim
 	| split row '.'
 	| each {|i| $i | into int}
 }
 
 def packer_version [] {
-	open $'($env.NU_PACKER_HOME)/start/packer.nu/meta.nuon'
-	| $in.version? | default [0 0 0]
+	open --raw $'($env.NU_PACKER_HOME)/start/packer.nu/meta.nuon'
+	| decode 'utf-8'
+	| from nuon
+	| $in.version?
+	| default [0 0 0]
 }
 
 def version_comparison [
 	version_a #: list<int> # [major minor patch]
 	version_b #: list<int> # [major minor patch]
 ] {
-	if $version_a.0 > $version_b.0 {'>'
-	} else if $version_a.0 < $version_b.0 {'<'
+	if $version_a.0 > $version_b.0 {
+		'>'
+	} else if $version_a.0 < $version_b.0 {
+		'<'
+	} else if $version_a.1 > $version_b.1 {
+		'>'
+	} else if $version_a.1 < $version_b.1 {
+		'<'
 	} else {
-		if $version_a.1 > $version_b.1 {'>'
-		} else if $version_a.1 < $version_b.1 {'<'
-		} else { '==' }
+		'=='
 	}
 }
 
@@ -180,7 +198,9 @@ def is_package_compatible [
 		((version_comparison $packer_version $min_packer_version) != '<')
 		((version_comparison $packer_version $max_packer_version) != '>')
 	] | all {|i| $i})
-	if not $result { print $"(ansi white_dimmed)Skipped: ($package.name) \(incompatible version).(ansi reset)" }
+	if not $result {
+		print $"(ansi white_dimmed)Skipped: ($package.name) \(incompatible version).(ansi reset)"
+	}
 	$result
 }
 
@@ -190,7 +210,9 @@ def symlink [
 	link: string
 ] {
 	# Remove any existing link - Just in case
-	if ($link | path exists) { rm $link }
+	if ($link | path exists) {
+		rm $link
+	}
 
 	# Create the link - OS specific
 	if ($nu.os-info.family == 'windows') {
@@ -219,8 +241,11 @@ export def compile [] {
 			$package
 			| insert meta {||
 				let tmp = (meta load $package)
-				if ($tmp | describe | str starts-with "record") {$tmp
-				} else {null}
+				if ($tmp | describe | str starts-with "record") {
+					$tmp
+				} else {
+					null
+				}
 			}
 		}
 		| where (
@@ -242,19 +267,25 @@ export def compile_cond_init [file: path] {
 		| where not opt
 		| where not deactivate
 		| where condition != null
-		| par-each {|package| $package | insert meta {|| meta load $package}}
+		| par-each {|package|
+			$package
+			| insert meta {||
+				meta load $package
+			}
+		}
 		| where {|package| (
 			(
 				$ignore_compatibility
 				or (is_package_compatible $package $nu_version $packer_version)
 			) and (
 				$package.condition
-				| $in.env? | default {}
+				| $in.env?
+				| if $in == null { {} } else { $in }  # `default {}` might interpret it as a closure and thus keep in null and `default {|| {}}` does not work with old versions
 				| transpose k v
 				| each {|i| (
 					($env | transpose k v | where $it.k == $i.k).0?.v?
 				) in $i.v}
-				| all {}
+				| all {|i| $i }
 			)
 		)}
 	)
@@ -275,7 +306,7 @@ def generate_init_file [
 		} | compact
 		| str join ' '
 	)
-	let package_configs = (nu --commands (
+	let package_configs = (^$nu.current-exe --commands (
 		$packages
 		| par-each {|i|
 			if $i.config != null {
@@ -321,15 +352,17 @@ def generate_init_file [
 			| par-each {|package|
 				let meta_file = $'($package.dir)/meta.nuon'
 				if ($meta_file | path exists) {
-					let meta = (open $meta_file)
+					let meta = (open --raw $meta_file | decode 'utf-8' | from nuon)
 					[(
-						$meta.modules? | default []
+						$meta.modules?
+						| default []
 						| where not ($it in $package.disabled_modules)
 						| each {|module|
 							$'export use ($package.dir)/($module).nu *'
 						}
 					), (
-						$meta.prefixed_modules? | default []
+						$meta.prefixed_modules?
+						| default []
 						| where not ($it in $package.disabled_modules)
 						| each {|module|
 							$'export use ($package.dir)/($module).nu'

@@ -42,10 +42,12 @@ def 'append_to_file' [
 	file: path
 	lines: list
 ] {
-	open $file
+	open --raw $file
+	| decode 'utf-8'
 	| lines
 	| append $lines
 	| str join (char nl)
+	| $in  # ensure it is collected
 	| save --force $file
 }
 
@@ -80,8 +82,8 @@ if not ($PACKER_PACKAGE_DIR | path exists) {
 	print $'(ansi g)Git cloned packer.nu.'
 } else { print $'(ansi u)Already git cloned packer.nu.(ansi reset)' }
 
-let regenerate_config = not (open $nu.config-path | str contains "\n### packer.nu ###\n")
-let regenerate_env = not (open $nu.env-path | str contains "\n### packer.nu ###\n")
+let regenerate_config = not (open --raw $nu.config-path | decode 'utf-8' | str contains "\n### packer.nu ###\n")
+let regenerate_env = not (open --raw $nu.env-path | decode 'utf-8' | str contains "\n### packer.nu ###\n")
 let enable_conditional_loading = (
 	if $regenerate_env {
 		print ''
