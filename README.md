@@ -2,10 +2,13 @@
 
 ## What does deprecated mean here?
 
-I will for the foreseeable future keep this compatible with new nu versions, but
+I will ~~for the foreseeable future~~ keep this compatible with new nu versions until 0.111.0, but
 * i wont add new features / packages.
-* when a alternative has properly matured i will archive this.
+* ~~when a alternative has properly matured i will archive this.~~
 * I'm no longer using it myself and therefore might not notice new bugs.
+
+(i have given up hope for something maturing - its time to either switch or fork.
+but due to the low package count i doubt anyone still uses this.)
 
 
 ## What now?
